@@ -5,7 +5,7 @@ Created on Tue Oct  9 09:28:53 2018
 
 @author: paullavest
 """
-
+#THIS IS A TEST
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
