@@ -27,10 +27,8 @@ class Users_inventory:
     def _return_dataframe_users(self):
         dataframe = df.from_dict(self._dict_users, orient='index')
         return dataframe
-    
-    
 
-class Users(Users_inventory):
+class Users:
     
     _compteur = 0
     
@@ -99,24 +97,7 @@ class Users(Users_inventory):
             if user_id == reset_user_id:
                 return password
         
-        import smtplib
-        from email.MIMEMultipart import MIMEMultipart
-        from email.MIMEText import MIMEText
-        
-        msg = MIMEMultipart()
-        msg['From'] = 'XXX@gmail.com'
-        msg['To'] = 'YYY@gmail.com'
-        msg['Subject'] = 'Le sujet de mon mail' 
-        message = 'Bonjour !'
-        msg.attach(MIMEText(message))
-        mailserver = smtplib.SMTP('smtp.gmail.com', 587)
-        mailserver.ehlo()
-        mailserver.starttls()
-        mailserver.ehlo()
-        mailserver.login('XXX@gmail.com', 'PASSWORD')
-        mailserver.sendmail('XXX@gmail.com', 'XXX@gmail.com', msg.as_string())
-        mailserver.quit()
-        
+
             
         
         
