@@ -12,8 +12,9 @@
 <h1>Results</h1>
 {{ number_results }} responded to your search {{ query }} !<br />
 
-<h3>Find your series here:</h3> 
-{{ liste }}
+<h3>Find your series here:</h3>
+
+{{html | safe}} 
 
 {% endif %}
 {% endblock %}
