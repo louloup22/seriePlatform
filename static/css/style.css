@@ -26,3 +26,8 @@ li a:hover {
 .active {
     background-color: #4CAF50;
 }
+
+.title_nav
+{
+    float:none
+}
