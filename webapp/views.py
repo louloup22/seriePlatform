@@ -24,15 +24,21 @@ def signup(request):
 
 def search(request):
     if request.method == 'POST':
-        form = SearchForm(request.post)
+        form = SearchForm(request.POST)
         if form.is_valid():
-            query = form.cleaned_data['query']
-            resp = Search._get_serie_by_name_with_space(query)
-            number_results = Search._get_number_of_result(query)
+            query = form.cleaned_data.get('query')
+            search_class = Search(query)
+            resp = search_class._get_serie_by_name_with_space(query)
+            number_results = search_class._get_number_of_result(query)
             #liste des ids
-            ids = Search._get_id_from_result(query)
+            ids = search_class._get_id_from_result(query)
+            
+            liste=[]
             for tv_id in ids:
-                attributes = Search._get_attributes_for_serie(tv_id)
+                attributes = search_class._get_attributes_for_serie(tv_id)
+                liste.append(attributes)
+            #return redirect('/search')
+            envoi = True
         else:
             form = SearchForm()
     
