@@ -13,6 +13,7 @@ urlpatterns = [
         path('',views.home),
         path('login/',auth_views.login,{'template_name': 'webapp/login.html'}),
         path('logout/',auth_views.logout,{'template_name': 'webapp/logout.html'}),
-        path('signup/', views.signup, name='signup'),
+        path('signup/', views.signup, name= 'signup'),
+        path('search/',views.search, name = 'search')
         ]
 
