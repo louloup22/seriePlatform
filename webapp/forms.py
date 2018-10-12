@@ -21,7 +21,6 @@ class SignUpForm(UserCreationForm):
 
 class SearchForm(forms.Form):
     query = forms.CharField(max_length=30,required=True,help_text='Search TV shows here')
-    
     class Meta:
         model = Search
         fields = ('query',)

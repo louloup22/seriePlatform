@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import login, authenticate
 from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search
+from pandas import DataFrame as df
 
 def home(request):
     return render(request, 'base.html')
@@ -33,10 +34,16 @@ def search(request):
             #liste des ids
             ids = search_class._get_id_from_result(query)
             
-            liste=[]
-            for tv_id in ids:
-                attributes = search_class._get_attributes_for_serie(tv_id)
-                liste.append(attributes)
+            #verif que ca peut marcher
+            dict_series = search_class._get_attributes_for_serie(ids)
+            dataframe = df.from_dict(dict_series,orient='index')
+            html = dataframe.to_html()
+
+            
+            #liste=[]
+            #for tv_id in ids:
+            #    attributes = search_class._get_attributes_for_serie(tv_id)
+            #    liste.append(attributes)
             #return redirect('/search')
             envoi = True
         else:
