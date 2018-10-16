@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-config.py
-
-
-=======
 .DS_Store
 .gitignore
 SeriePlatform1/__pycache__/
 webapp/__pycache__/
 webapp/config.py
 webapp/migrations/__pycache__/
->>>>>>> 6c8a602fd1ed954e98b0475bf4398d1edc7d44e4
+Notes.txt
