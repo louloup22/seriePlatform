@@ -128,6 +128,8 @@ class Serie(models.Model):
                 self.next_episode=dico["next_episode"]
                 self.next_episode_date=dico["next_episode_date"]
 
+
+
 class Profil(models.Model):
     user =  models.OneToOneField(User,on_delete=models.CASCADE) #liaison vers modèle User
     favorites = models.TextField(null=True)
@@ -136,8 +138,8 @@ class Profil(models.Model):
     #attention à la forme
     def _add_favorites(self,x):
         self.favorites = json.dumps(x)
-    
-    
+
+
     def _convert_favorites(self):
         liste_favorites = []
         string = json.loads(self.favorites)
@@ -150,12 +152,14 @@ class Profil(models.Model):
     def _get_favorites(self):
         # return favorites
         return self._convert_favorites()
-    #return json.loads(self.favorites)
+        #return json.loads(self.favorites)
     
     #voir methode pour retirer directement dans le json
     def _remove_favorites(self,x):
         new_list = self._convert_favorites().pop(x)
         self.favorites = json.dumps(new_list)
+        
+    
 
                 
 

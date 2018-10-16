@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import login, authenticate
 from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search, Serie
+from webapp.models import Search
 from pandas import DataFrame as df
 
 def home(request):
@@ -38,7 +39,7 @@ def search(request):
             dict_series = search_class._get_attributes_for_serie(ids)
             dataframe = df.from_dict(dict_series,orient='index')
             html = dataframe.to_html()
-            
+
             
             #liste=[]
             #for tv_id in ids:

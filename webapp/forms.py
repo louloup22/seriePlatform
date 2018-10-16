@@ -20,8 +20,7 @@ class SignUpForm(UserCreationForm):
         fields = ('username','first_name','last_name','email','password1','password2',)
 
 class SearchForm(forms.Form):
-    query = forms.CharField(widget=forms.Textarea)
-    
+    query = forms.CharField(max_length=30,required=True,help_text='Search TV shows here')
     class Meta:
         model = Search
         fields = ('query',)

@@ -1,21 +1,20 @@
 {% extends "base.html" %}
- {% block nav %}
-       <ul>
-            <li><a class="active" href="/">Home</a></li>
-            <li><a href="/signup/">Signup</a></li>
-            <li><a href="/login/">Login</a></li>
-           <li><a href="/search/">Search</a></li>
-            <li style="float:right"><a href="/logout/">Logout</a></li>
-       </ul>
-       {% endblock %}
 
 {% block content %}
 <h1>Search TV shows</h1>
-<form method="post" action="{% url "search" %}">
+<form method="post" action=".">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Search" />
 </form>
+
+{% if envoi %}
 <h1>Results</h1>
-{{ resp }}
+{{ number_results }} responded to your search {{ query }} !<br />
+
+<h3>Find your series here:</h3>
+
+{{html | safe}} 
+
+{% endif %}
 {% endblock %}
