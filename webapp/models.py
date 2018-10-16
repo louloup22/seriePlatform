@@ -35,10 +35,11 @@ class Search(models.Model):
     
     def _get_attributes_for_serie(self,tv_id):
         dico={}
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+self.API_KEY+"&language=en-US"
+        #url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+self.API_KEY+"&language=en-US"
+        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+"e403e0e25456da8a7d4727d3139f0d88"+"&language=en-US"
         req =requests.get(url)
         resp=json.loads(req.content)
-        print(resp)
+        #print(resp)
         dico["genres"]=resp["genres"]
         if resp['in_production']==False:
             #question pour next air date pas forcément donné par l'API

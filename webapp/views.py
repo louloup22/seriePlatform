@@ -42,12 +42,12 @@ def search(request):
 
 
 def favorites(request):
-    favorite_series=['test1','test2','test3']
-    favorite_seriesid=['1','2']
+    favorite_seriesid=[71446,66732]
+    liste_dico_serie=[]
     for id in favorite_seriesid:
-        serie=Serie()
-        serie._get_attributes_for_serie(id)
-        serie.save()
+        search_class = Search('')
+        dict_series = search_class._get_attributes_for_serie(id)
+        liste_dico_serie.append(dict_series)
     return render(request, 'webapp/favorites.html',locals())
         
             
