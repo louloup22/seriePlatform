@@ -38,6 +38,8 @@ def search(request):
             #verif que ca peut marcher
             dict_series = search_class._get_attributes_for_serie(ids)
             dataframe = df.from_dict(dict_series,orient='index')
+            #for index,row in dataframe.iterrows():
+                #row['name']
             html = dataframe.to_html()
 
             
