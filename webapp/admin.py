@@ -11,9 +11,9 @@ class SerieAdmin(admin.ModelAdmin):
     fields = ('name','nb_seasons','genres','short_overview','next_episode','next_episode_date')
     
     def short_overview(self, serie):
-        return Truncator(serie.overview).chars(80, truncate='...')
+        return Truncator(serie.overview).chars(200, truncate='...')
     short_overview.short_description = 'Glimpse of overview'
-    
+
 
 
 admin.site.register(Serie,SerieAdmin)
