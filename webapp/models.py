@@ -34,63 +34,64 @@ class Search(models.Model):
         return liste_id
     
     def _get_attributes_for_serie(self,tv_id):
-        dico={}
-        #url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+self.API_KEY+"&language=en-US"
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+"e403e0e25456da8a7d4727d3139f0d88"+"&language=en-US"
-        req =requests.get(url)
-        resp=json.loads(req.content)
-        #print(resp)
-        dico["genres"]=resp["genres"]
-        if resp['in_production']==False:
-            #question pour next air date pas forcément donné par l'API
-            dico["next_episode_date"]=None
-        else: 
-            if resp['next_episode_to_air']==None:
-                dico["next_episode_date"]="Not known"
-                dico["next_episode"]="Not known"
-            else:
-                next_air=resp["next_episode_to_air"]["air_date"]
-                liste=list(map(int,re.findall(r'\d+',next_air)))
+        dict_series = {}
+        for i in range(len(tv_id)):
+            dico={}
+            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
+            req =requests.get(url)
+            resp=json.loads(req.content)
+            print(resp)
+            dico["genres"]=resp["genres"]
+            if resp['in_production']==False:
+                #question pour next air date pas forcément donné par l'API
+                dico["next_episode_date"]=None
+            else: 
+                if resp['next_episode_to_air']==None:
+                    dico["next_episode_date"]="Not known"
+                    dico["next_episode"]="Not known"
+                else:
+                    next_air=resp["next_episode_to_air"]["air_date"]
+                    liste=list(map(int,re.findall(r'\d+',next_air)))
+                    if len(liste)==3:
+                        dico["next_episode_date"]=date(liste[0],liste[1],liste[2])
+                    season=resp["next_episode_to_air"]["season_number"]
+                    episode=resp["next_episode_to_air"]["episode_number"]
+                    dico["next_episode"]="{}x{}".format(season,episode)
+                    
+            
+            if resp["last_air_date"]!=None:        
+                last_air=resp["last_air_date"]
+                liste=list(map(int,re.findall(r'\d+',last_air)))
                 if len(liste)==3:
-                    dico["next_episode_date"]=date(liste[0],liste[1],liste[2])
-                season=resp["next_episode_to_air"]["season_number"]
-                episode=resp["next_episode_to_air"]["episode_number"]
-                dico["next_episode"]="{}x{}".format(season,episode)
+                    dico["last_episode_date"]=date(liste[0],liste[1],liste[2])
+                else:
+                    dico["last_episode_date"]="Error"
+            else:
+                dico["last_episode_date"]=None
+            
+            #last episode
+            if dico["last_episode_date"]==None:
+                dico["last_episode"]=None
+            elif resp["last_episode_to_air"]!=None:
+                #should we add id ?
+                season=resp["last_episode_to_air"]["season_number"]
+                episode=resp["last_episode_to_air"]["episode_number"]
+                dico["last_episode"]="{}x{}".format(season,episode)
+            else:
+                dico["last_episode"]=None
                 
         
-        if resp["last_air_date"]!=None:        
-            last_air=resp["last_air_date"]
-            liste=list(map(int,re.findall(r'\d+',last_air)))
-            if len(liste)==3:
-                dico["last_episode_date"]=date(liste[0],liste[1],liste[2])
-            else:
-                dico["last_episode_date"]="Error"
-        else:
-            dico["last_episode_date"]=None
-        
-        #last episode
-        if dico["last_episode_date"]==None:
-            dico["last_episode"]=None
-        elif resp["last_episode_to_air"]!=None:
-            #should we add id ?
-            season=resp["last_episode_to_air"]["season_number"]
-            episode=resp["last_episode_to_air"]["episode_number"]
-            dico["last_episode"]="{}x{}".format(season,episode)
-        else:
-            dico["last_episode"]=None
+                
+            #name
+            dico["name"]=resp["name"]
             
-    
+            dico["overview"]=resp["overview"]
             
-        #name
-        dico["name"]=resp["name"]
-        
-        dico["overview"]=resp["overview"]
-        
-        dico["nb_episodes"]=resp["number_of_episodes"]
-        dico["nb_seasons"]=resp["number_of_seasons"]
-        dico['id']=tv_id
-        return dico
-        #return resp
+            dico["nb_episodes"]=resp["number_of_episodes"]
+            dico["nb_seasons"]=resp["number_of_seasons"]
+            dico['id']=tv_id[i]
+            dict_series[dico['id']]=dico
+        return dict_series
 
 
 #id will be automatically generated by the model
@@ -126,7 +127,36 @@ class Serie(models.Model):
                 self.last_episode_date=dico["last_episode_date"]
                 self.next_episode=dico["next_episode"]
                 self.next_episode_date=dico["next_episode_date"]
+
+class Profil(models.Model):
+    user =  models.OneToOneField(User,on_delete=models.CASCADE) #liaison vers modèle User
+    favorites = models.TextField(null=True)
     
+    #faire un bouton add favorites qui permet d'appeler cette méthode
+    #attention à la forme
+    def _add_favorites(self,x):
+        self.favorites = json.dumps(x)
+    
+    
+    def _convert_favorites(self):
+        liste_favorites = []
+        string = json.loads(self.favorites)
+        for el in string:
+            liste_favorites.append(el)
+        #liste
+        return liste_favorites
+    
+    
+    def _get_favorites(self):
+        # return favorites
+        return self._convert_favorites()
+    #return json.loads(self.favorites)
+    
+    #voir methode pour retirer directement dans le json
+    def _remove_favorites(self,x):
+        new_list = self._convert_favorites().pop(x)
+        self.favorites = json.dumps(new_list)
+
                 
 
 
