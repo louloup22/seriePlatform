@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Sign up page for My Serie Platform{% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
+
+<br />
+<br />
+The trending series today are:
+<br />
+<br />
+
+<table>
+   
+   <thead> <!-- En-tête du tableau -->
+       <tr>
+           <th>Name</th>
+           <th>Overview</th>
+           <th>Vote</th>
+		   <th>First air date</th>
+		   <th></th>
+       </tr>
+   </thead>
+
+   <tbody> <!-- Corps du tableau -->
+   {% for serie in results %}
+		<tr>
+           <td>{{ serie.name }}</td>
+           <td>{{ serie.overview }}</td>
+           <td>{{ serie.vote_average }}</td>
+		   <td>{{ serie.first_air_date }}</td>
+		   <td><a href="/serieinfo/{{ serie.id }}"> More info</a></td>
+       </tr>
+	{% endfor %}       
+   </tbody>
+</table>
+
+{% else %}
+Vous devez être connecté !
+{% endif %}
+{% endblock %}

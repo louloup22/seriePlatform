@@ -26,3 +26,16 @@ li a:hover {
 .active {
     background-color: #4CAF50;
 }
+
+
+/* Modif Matthias tableau */
+
+table
+{
+    border-collapse: collapse; 
+}
+
+td
+{
+    border: 1px solid black;
+}

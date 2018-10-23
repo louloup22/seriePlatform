@@ -54,12 +54,34 @@ def search(request):
 
 def favorites(request):
     favorite_seriesid=[71446,66732]
-    liste_dico_serie=[]
-    for id in favorite_seriesid:
-        search_class = Search('')
-        dict_series = search_class._get_attributes_for_serie(id)
-        liste_dico_serie.append(dict_series)
+    search_class = Search('')
+    dict_series = search_class._get_attributes_for_serie_by_list(favorite_seriesid)
     return render(request, 'webapp/favorites.html',locals())
+
+def serieinfo(request,serie_id):
+    search_class = Search('')
+    serie_info = search_class._get_attributes_for_serie_by_list([serie_id])[0]
+    similar_series = search_class._get_similar_series(serie_id)
+    return render(request, 'webapp/serieinfo.html',locals())
+
+def seasoninfo(request,serie_id,season_number):
+    search_class = Search('')
+    season_info = search_class._get_attributes_for_season(serie_id,season_number)
+    return render(request, 'webapp/seasoninfo.html',locals())
+
+def trending(request):
+    search_class = Search('')
+    results = search_class._get_series_trending()
+    return render(request, 'webapp/trending.html',locals())
         
+def profile(request):
+    search_class = Search('')
+    favorite_seriesid=[71446,66732]
+    results = search_class._get_episodes_by_list(favorite_seriesid)
+    incoming_episodes=[]
+    recent_episodes=[]
+    #for i in range(len(results)):
+    #    if datetime.date(int(results[i]["episode_air_date"][0:4]),int(results[i]["episode_air_date"][5:7]),int(results[i]["episode_air_date"][8:10])-datetime.date.today():
             
+    return render(request, 'webapp/trending.html',locals())
             
