@@ -5,7 +5,9 @@
 <br />
 <br />
 Your favorite series {{ user.username }}:
-<br />
+
+{{html | safe}} 
+<!--<br />
 <br />
 {% for serie in liste_dico_serie %}
 	<b><p>{{ serie.name }}</p></b>
@@ -16,7 +18,7 @@ Your favorite series {{ user.username }}:
 	<p>Last episode :{{ serie.last_episode }}</p>
 	<p><a href="{% url 'favorites' %}">More info</a></p>
 	<br />
-{% endfor %}
+{% endfor %}-->
 {% else %}
 Vous devez être connecté !
 {% endif %}

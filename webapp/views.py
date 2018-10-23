@@ -4,6 +4,8 @@ from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search, Serie
 from webapp.models import Search
 from pandas import DataFrame as df
+import pandas as pd
+import numpy as np
 
 def home(request):
     return render(request, 'base.html')
@@ -36,11 +38,15 @@ def search(request):
             ids = search_class._get_id_from_result(query)
             
             #verif que ca peut marcher
-            dict_series = search_class._get_attributes_for_serie(ids)
-            dataframe = df.from_dict(dict_series,orient='index')
+            #dict_series = search_class._get_attributes_for_serie(ids)
+            #dataframe = df.from_dict(dict_series,orient='index')
             #for index,row in dataframe.iterrows():
                 #row['name']
-            html = dataframe.to_html()
+            #html = dataframe.to_html()
+            dataframe = search_class._get_attributes_in_dataframe_html(ids)
+            taille=len(dataframe['name'])
+            dataframe['button']=pd.Series(np.zeros(taille),index=dataframe.index)
+            html=dataframe.to_html()
 
             
             #liste=[]
@@ -57,11 +63,14 @@ def search(request):
 
 def favorites(request):
     favorite_seriesid=[71446,66732]
-    liste_dico_serie=[]
-    for id in favorite_seriesid:
-        search_class = Search('')
-        dict_series = search_class._get_attributes_for_serie(id)
-        liste_dico_serie.append(dict_series)
+    search_class = Search('hello')
+    dataframe = search_class._get_attributes_in_dataframe_html(favorite_seriesid)
+    html = dataframe.to_html()
+#    liste_dico_serie=[]
+#    for id in favorite_seriesid:
+#        search_class = Search('')
+#        dict_series = search_class._get_attributes_for_serie(id)
+#        liste_dico_serie.append(dict_series)
     return render(request, 'webapp/favorites.html',locals())
         
             

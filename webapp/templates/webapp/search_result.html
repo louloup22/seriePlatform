@@ -14,7 +14,13 @@
 
 <h3>Find your series here:</h3>
 
-{{html | safe}} 
+{% for el in html %}
+
+{{html | safe}}
+
+<button type="button">Click Me!</button>
+
+
 
 {% endif %}
 {% endblock %}
