@@ -3,9 +3,11 @@ from django.contrib.auth import login, authenticate
 from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search, Serie
 from pandas import DataFrame as df
+import datetime
 
 def home(request):
     return render(request, 'base.html')
+
 
 
 def signup(request):
@@ -76,12 +78,10 @@ def trending(request):
         
 def profile(request):
     search_class = Search('')
-    favorite_seriesid=[71446,66732]
-    results = search_class._get_episodes_by_list(favorite_seriesid)
-    incoming_episodes=[]
-    recent_episodes=[]
-    #for i in range(len(results)):
-    #    if datetime.date(int(results[i]["episode_air_date"][0:4]),int(results[i]["episode_air_date"][5:7]),int(results[i]["episode_air_date"][8:10])-datetime.date.today():
-            
-    return render(request, 'webapp/trending.html',locals())
+    favorite_seriesid=[71446,66732,61056]
+    results = search_class._get_recent_and_incoming_episodes_by_list(favorite_seriesid)
+    results_trending = search_class._get_series_trending()
+    incoming_episodes=results[1]
+    recent_episodes=results[0]
+    return render(request, 'webapp/profile.html',locals())
             

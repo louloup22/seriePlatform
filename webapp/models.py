@@ -4,7 +4,7 @@ import webapp.config as config
 import json
 import requests
 from pandas import DataFrame as df
-from datetime import date
+import datetime
 import re
 import urllib.request
 
@@ -36,132 +36,31 @@ class Search(models.Model):
     def _get_attributes_for_serie(self,tv_id):
         dict_series = {}
         for i in range(len(tv_id)):
-            dico={}
             url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
             req =requests.get(url)
             resp=json.loads(req.content)
             print(resp)
-            dico["genres"]=resp["genres"]
-            if resp['in_production']==False:
-                #question pour next air date pas forcément donné par l'API
-                dico["next_episode_date"]=None
-            else: 
-                if resp['next_episode_to_air']==None:
-                    dico["next_episode_date"]="Not known"
-                    dico["next_episode"]="Not known"
-                else:
-                    next_air=resp["next_episode_to_air"]["air_date"]
-                    liste=list(map(int,re.findall(r'\d+',next_air)))
-                    if len(liste)==3:
-                        dico["next_episode_date"]=date(liste[0],liste[1],liste[2])
-                    season=resp["next_episode_to_air"]["season_number"]
-                    episode=resp["next_episode_to_air"]["episode_number"]
-                    dico["next_episode"]="{}x{}".format(season,episode)
-                    
-            
-            if resp["last_air_date"]!=None:        
-                last_air=resp["last_air_date"]
-                liste=list(map(int,re.findall(r'\d+',last_air)))
-                if len(liste)==3:
-                    dico["last_episode_date"]=date(liste[0],liste[1],liste[2])
-                else:
-                    dico["last_episode_date"]="Error"
-            else:
-                dico["last_episode_date"]=None
-            
-            #last episode
-            if dico["last_episode_date"]==None:
-                dico["last_episode"]=None
-            elif resp["last_episode_to_air"]!=None:
-                #should we add id ?
-                season=resp["last_episode_to_air"]["season_number"]
-                episode=resp["last_episode_to_air"]["episode_number"]
-                dico["last_episode"]="{}x{}".format(season,episode)
-            else:
-                dico["last_episode"]=None
-                
-        
-                
-            #name
-            dico["name"]=resp["name"]
-            
-            dico["overview"]=resp["overview"]
-            
-            dico["nb_episodes"]=resp["number_of_episodes"]
-            dico["nb_seasons"]=resp["number_of_seasons"]
-            dico['id']=tv_id[i]
-            dict_series[dico['id']]=dico
+            serie=Serie(resp)
+            dict_series[serie.id]=serie
         return dict_series
     
     def _get_attributes_for_serie_by_list(self,tv_id):
         dict_series = []
         for i in range(len(tv_id)):
-            dico={}
             url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
             req =requests.get(url)
             resp=json.loads(req.content)
             print(resp)
-            dico["genres"]=resp["genres"]
-            if resp['in_production']==False:
-                #question pour next air date pas forcément donné par l'API
-                dico["next_episode_date"]=None
-            else: 
-                if resp['next_episode_to_air']==None:
-                    dico["next_episode_date"]="Not known"
-                    dico["next_episode"]="Not known"
-                else:
-                    next_air=resp["next_episode_to_air"]["air_date"]
-                    liste=list(map(int,re.findall(r'\d+',next_air)))
-                    if len(liste)==3:
-                        dico["next_episode_date"]=date(liste[0],liste[1],liste[2])
-                    season=resp["next_episode_to_air"]["season_number"]
-                    episode=resp["next_episode_to_air"]["episode_number"]
-                    dico["next_episode"]="{}x{}".format(season,episode)
-                    
-            
-            if resp["last_air_date"]!=None:        
-                last_air=resp["last_air_date"]
-                liste=list(map(int,re.findall(r'\d+',last_air)))
-                if len(liste)==3:
-                    dico["last_episode_date"]=date(liste[0],liste[1],liste[2])
-                else:
-                    dico["last_episode_date"]="Error"
-            else:
-                dico["last_episode_date"]=None
-            
-            #last episode
-            if dico["last_episode_date"]==None:
-                dico["last_episode"]=None
-            elif resp["last_episode_to_air"]!=None:
-                #should we add id ?
-                season=resp["last_episode_to_air"]["season_number"]
-                episode=resp["last_episode_to_air"]["episode_number"]
-                dico["last_episode"]="{}x{}".format(season,episode)
-            else:
-                dico["last_episode"]=None
-            #name
-            dico["name"]=resp["name"]
-            
-            dico["overview"]=resp["overview"]
-            
-            dico["nb_episodes"]=resp["number_of_episodes"]
-            dico["nb_seasons"]=resp["number_of_seasons"]
-            dico["seasons"]=resp["seasons"]
-            dico["poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
-            dico["id"]=resp["id"]
-            dict_series.append(dico)
+            serie=Serie(resp)
+            dict_series.append(serie)
         return dict_series
     
     def _get_attributes_for_season(self,tv_id,season_number):
-        dico={}
         url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+self.API_KEY+"&language=en-US"
         req =requests.get(url)
         resp=json.loads(req.content)
-        dico["name"]=resp["name"]
-        dico["overview"]=resp["overview"]
-        dico["air_date"]=resp["air_date"]
-        dico["episodes"]=resp["episodes"]
-        return dico
+        season_info=Season(resp)
+        return season_info
     
     def _get_series_trending(self):
         url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page=1"
@@ -177,8 +76,9 @@ class Search(models.Model):
         results=resp["results"]
         return results
         
-    def _get_episodes_by_list(self,tv_id):
-        dict_series = []
+    def _get_recent_and_incoming_episodes_by_list(self,tv_id):
+        dict_recent_episodes = []
+        dict_incoming_episodes = []
         for i in range(len(tv_id)):
             url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
             req =requests.get(url)
@@ -187,22 +87,63 @@ class Search(models.Model):
                 url2="https://api.themoviedb.org/3/tv/"+str(resp["id"])+"/season/"+str(resp["seasons"][j]["season_number"])+"?api_key="+self.API_KEY+"&language=en-US"
                 req2 =requests.get(url2)
                 resp2=json.loads(req2.content)
+                dico_recent_episodes={}
+                dico_incoming_episodes={}
+                liste_recent_episode=[]
+                liste_incoming_episode=[]
+                dico_recent_episodes["serie_id"]=resp["id"]
+                dico_recent_episodes["serie_name"]=resp["name"]
+                dico_recent_episodes["serie_overview"]=resp["overview"]
+                dico_recent_episodes["serie_poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+                dico_recent_episodes["serie_nb_episodes"]=resp["number_of_episodes"]
+                dico_recent_episodes["serie_nb_seasons"]=resp["number_of_seasons"]
+                dico_recent_episodes["season_name"]=resp["seasons"][j]["name"]
+                dico_recent_episodes["season_number"]=resp["seasons"][j]["season_number"]
+                dico_incoming_episodes["serie_id"]=resp["id"]
+                dico_incoming_episodes["serie_name"]=resp["name"]
+                dico_incoming_episodes["serie_overview"]=resp["overview"]
+                dico_incoming_episodes["serie_poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+                dico_incoming_episodes["serie_nb_episodes"]=resp["number_of_episodes"]
+                dico_incoming_episodes["serie_nb_seasons"]=resp["number_of_seasons"]
+                dico_incoming_episodes["season_name"]=resp["seasons"][j]["name"]
+                dico_incoming_episodes["season_number"]=resp["seasons"][j]["season_number"]
+                
                 for k in range(len(resp2["episodes"])):
-                    dico={}
-                    dico["serie_id"]=resp["id"]
-                    dico["serie_name"]=resp["name"]
-                    dico["serie_overview"]=resp["overview"]
-                    dico["serie_poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
-                    dico["serie_nb_episodes"]=resp["number_of_episodes"]
-                    dico["serie_nb_seasons"]=resp["number_of_seasons"]
-                    dico["season_name"]=resp["seasons"][j]["name"]
-                    dico["season_number"]=resp["seasons"][j]["season_number"]
-                    dico["episode_air_date"]=resp2["episodes"][k]["air_date"]
-                    dico["episode_name"]=resp2["episodes"][k]["name"]
-                    dico["episode_overview"]=resp2["episodes"][k]["overview"]
-                    dico["episode_number"]=resp2["episodes"][k]["episode_number"]
-                    dict_series.append(dico)
-        return dict_series
+                    dico_recent_episode={}
+                    dico_incoming_episode={}
+                    if resp2["episodes"][k]["air_date"]==None:
+                        diff_jours=100
+                    else:
+                        diff_jours=(datetime.date(int(resp2["episodes"][k]["air_date"][0:4]),int(resp2["episodes"][k]["air_date"][5:7]),int(resp2["episodes"][k]["air_date"][8:10]))-datetime.date.today()).days
+                    if diff_jours>=0 and diff_jours<30:
+                        dico_incoming_episode["episode_air_date"]=resp2["episodes"][k]["air_date"]
+                        dico_incoming_episode["episode_name"]=resp2["episodes"][k]["name"]
+                        dico_incoming_episode["episode_overview"]=resp2["episodes"][k]["overview"]
+                        dico_incoming_episode["episode_number"]=resp2["episodes"][k]["episode_number"]
+                        liste_incoming_episode.append(dico_incoming_episode)
+                    if diff_jours<0 and diff_jours>-30:
+                        dico_recent_episode["episode_air_date"]=resp2["episodes"][k]["air_date"]
+                        dico_recent_episode["episode_name"]=resp2["episodes"][k]["name"]
+                        dico_recent_episode["episode_overview"]=resp2["episodes"][k]["overview"]
+                        dico_recent_episode["episode_number"]=resp2["episodes"][k]["episode_number"]
+                        liste_recent_episode.append(dico_recent_episode)
+                dico_recent_episodes["episodes"]=liste_recent_episode            
+                dico_incoming_episodes["episodes"]=liste_incoming_episode
+                dict_recent_episodes.append(dico_recent_episodes)
+                dict_incoming_episodes.append(dico_incoming_episodes)
+            M=[]
+            for i in range(len(dict_recent_episodes)):
+                if dict_recent_episodes[i]["episodes"]==[]:
+                    M=[i]+M
+            for j in range(len(M)):
+                dict_recent_episodes.pop(M[j])
+            N=[]
+            for i in range(len(dict_incoming_episodes)):
+                if dict_incoming_episodes[i]["episodes"]==[]:
+                    N=[i]+N
+            for j in range(len(N)):
+                dict_incoming_episodes.pop(N[j])
+        return dict_recent_episodes,dict_incoming_episodes
 
 
 
@@ -219,7 +160,47 @@ class Serie(models.Model):
     last_episode = models.CharField(max_length=10, verbose_name = "Last episode", null = True)
     next_episode_date = models.DateTimeField(verbose_name =  "Date of next episode", null = True)
     next_episode = models.CharField(max_length=10, verbose_name = "Next episode", null = True)
-    
+
+    def __init__(self,resp):
+        self.id=resp["id"]
+        self.name=resp["name"]
+        self.genres=resp["genres"]
+        if resp['next_episode_to_air']==None:
+            self.next_episode_date="Not known"
+            self.next_episode="Not known"
+        else:
+            next_air=resp["next_episode_to_air"]["air_date"]
+            liste=list(map(int,re.findall(r'\d+',next_air)))
+            if len(liste)==3:
+                self.next_episode_date=datetime.date(liste[0],liste[1],liste[2])
+                season=resp["next_episode_to_air"]["season_number"]
+                episode=resp["next_episode_to_air"]["episode_number"]
+                self.next_episode="{}x{}".format(season,episode)
+            else:
+                self.next_episode_date="Error"
+                self.next_episode="Error"
+        if resp["last_air_date"]!=None:        
+            last_air=resp["last_air_date"]
+            liste=list(map(int,re.findall(r'\d+',last_air)))
+            if len(liste)==3:
+                self.last_episode_date=datetime.date(liste[0],liste[1],liste[2])
+            else:
+                self.last_episode_date="Error"
+        else:
+            self.last_episode_date=None
+        if resp["last_episode_to_air"]!=None:
+            #should we add id ?
+            season=resp["last_episode_to_air"]["season_number"]
+            episode=resp["last_episode_to_air"]["episode_number"]
+            self.last_episode="{}x{}".format(season,episode)
+        else:
+            self.last_episode=None
+        self.overview=resp["overview"]
+        self.nb_episodes=resp["number_of_episodes"]
+        self.nb_seasons=resp["number_of_seasons"]
+        self.seasons=resp["seasons"]
+        self.poster_path="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+
     class Meta:
         verbose_name = "Série"
         verbose_name_plural= "Séries"
@@ -228,7 +209,7 @@ class Serie(models.Model):
         return self.name
 
     def _get_info_episode_uptodate(self):
-        if date.now()>self.next_episode_date:
+        if datetime.date.now()>self.next_episode_date:
             obj_serie=Search._get_serie_by_name_with_space(self.name)
             if len(obj_serie["results"])==1:
                 id_serie=obj_serie["results"]["id"]
@@ -239,6 +220,16 @@ class Serie(models.Model):
                 self.last_episode_date=dico["last_episode_date"]
                 self.next_episode=dico["next_episode"]
                 self.next_episode_date=dico["next_episode_date"]
+
+
+class Season(models.Model):
+    
+    def __init__(self,resp):
+        self.name=resp["name"]
+        self.overview=resp["overview"]
+        self.air_date=resp["air_date"]
+        self.episodes=resp["episodes"]
+
 
 class Profil(models.Model):
     user =  models.OneToOneField(User,on_delete=models.CASCADE) #liaison vers modèle User
@@ -268,6 +259,10 @@ class Profil(models.Model):
     def _remove_favorites(self,x):
         new_list = self._convert_favorites().pop(x)
         self.favorites = json.dumps(new_list)
+        
+        
+
+
 
                 
 
