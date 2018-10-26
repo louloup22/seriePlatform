@@ -9,10 +9,10 @@ The trending series today are:
 <br />
 <br />
 
-<table>
+<!-- <table>
    
-   <thead> <!-- En-tête du tableau -->
-       <tr>
+   <thead> --> <!-- En-tête du tableau -->
+      <!--  <tr>
            <th>Name</th>
            <th>Overview</th>
            <th>Vote</th>
@@ -21,7 +21,8 @@ The trending series today are:
        </tr>
    </thead>
 
-   <tbody> <!-- Corps du tableau -->
+   <tbody> --> <!-- Corps du tableau -->
+    <div class="wrapper">
    {% for serie in dict_series.values %}
 
 
@@ -34,10 +35,13 @@ The trending series today are:
           <div class="text" >   
 <a href="/serieinfo/{{ serie.id }}"> 
           {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
         </div>
        </div>
 
-       
+
 <!-- 		<tr>
            <td>{{ serie.name }}</td>
            <td>{{ serie.overview }}</td>
@@ -45,9 +49,10 @@ The trending series today are:
 		   <td>{{ serie.first_air_date }}</td>
 		   <td><a href="/serieinfo/{{ serie.id }}"> More info</a></td>
        </tr> -->
-	{% endfor %}       
-   </tbody>
-</table>
+	{% endfor %}  
+  </div>     
+<!--    </tbody>
+</table> -->
 
 {% else %}
 Vous devez être connecté !

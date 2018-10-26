@@ -20,11 +20,31 @@
 {% endfor %}
 <br />
 
-<h3>Similar TV shows :</h3>
 
-<table>
-   <thead> <!-- En-tête du tableau -->
-       <tr>
+<h3>Similar TV shows :</h3>
+<div class="wrapper">
+{% for serie in similar_series.values %}
+<div class="container">
+        
+          <img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        
+        <div class="middle" >
+          <div class="text" >   
+<a href="/serieinfo/{{ serie.id }}"> {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+
+        </div>
+       </div>
+
+  {% endfor %} 
+</div>
+
+
+<!-- <table>
+   <thead> --> <!-- En-tête du tableau -->
+       <!-- <tr>
            <th>Name</th>
            <th>Overview</th>
            <th>Vote</th>
@@ -33,8 +53,12 @@
        </tr>
    </thead>
 
-   <tbody> <!-- Corps du tableau -->
-   {% for serie in similar_series %}
+   <tbody> --> <!-- Corps du tableau -->
+   <!-- {% for serie in similar_series %}
+
+
+
+
     <tr>
       <td>{{ serie.name }}</td>]
       <td>{{ serie.overview }}</td>
@@ -44,7 +68,7 @@
     </tr>
 	{% endfor %}       
   </tbody>
-</table>
+</table> -->
 {% else %}
 Vous devez être connecté !
 {% endif %}

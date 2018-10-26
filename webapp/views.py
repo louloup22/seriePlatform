@@ -40,7 +40,6 @@ def search(request):
             number_results = search_class._get_number_of_result(query)
             #liste des ids
             ids = search_class._get_id_from_result(query)
-            
             #verif que ca peut marcher
             #dict_series = search_class._get_attributes_for_serie(ids)
             #dataframe = df.from_dict(dict_series,orient='index')
@@ -50,14 +49,14 @@ def search(request):
             
             dict_series = search_class._get_attributes_for_serie(ids)
 
-            dataframe = df.from_dict(dict_series,orient='index')
+            #dataframe = df.from_dict(dict_series,orient='index')
             
 #            context = {
 #                    "profil_list": Profil.objects.all(),
 #                    "title": "Profil_List"
 #                    }
 
-            html = dataframe.to_html()
+            #html = dataframe.to_html()
             
             #dataframe = search_class._get_attributes_in_dataframe_html(ids)
             #taille=len(dataframe['name'])
@@ -116,8 +115,8 @@ def display_favorites(request):
     dict_series = search_class._get_attributes_for_serie(favorite_seriesid)
 
     
-    dataframe = search_class._get_attributes_in_dataframe_html(favorite_seriesid)
-    html = dataframe.to_html()
+#    dataframe = search_class._get_attributes_in_dataframe_html(favorite_seriesid)
+#    html = dataframe.to_html()
 #    liste_dico_serie=[]
 #    for id in favorite_seriesid:
 #        search_class = Search('')
@@ -128,7 +127,8 @@ def display_favorites(request):
 def serieinfo(request,serie_id):
     search_class = Search('')
     serie_info = search_class._get_attributes_for_serie_in_list([serie_id])[0]
-    similar_series = search_class._get_similar_series(serie_id)
+    ids = search_class._get_similar_series_ids(serie_id)
+    similar_series= search_class._get_attributes_for_serie(ids)
     return render(request, 'webapp/serieinfo.html',locals())
 
 def seasoninfo(request,serie_id,season_number):

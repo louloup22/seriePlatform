@@ -18,6 +18,7 @@ urlpatterns = [
                path('signup/', views.signup, name= 'signup'),
                path('search/',views.search, name = 'search'),
                path('search/<int:id>/add_favorites/<int:user_id>',views.add_favorite, name='add_favorite'),
+               path('search/<int:id>/remove_favorites/<int:user_id>',views.remove_favorite, name='remove_favorite'),
                path('favorites/',views.display_favorites, name = 'favorites'),
                path('trending/',views.trending, name = 'trending'),
                path('serieinfo/<int:serie_id>',views.serieinfo, name = 'serie_info'),
