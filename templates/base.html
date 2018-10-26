@@ -1,9 +1,39 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-   <link rel="stylesheet" href="../static/css/style.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  body, html {
+    height: 100%;
+}
+
+.trial { 
+    /* The image used */
+    background-image: url("../static/img/my_tv_show.png"); 
+    
+
+    /* Full height */
+    height: 100%; 
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+</style>
+-->
+   <!--<link rel="stylesheet" href="../static/css/style.css" />-->
+   <link rel="stylesheet" href="{% static 'css/style.css' %}">
    <title>{% block title %}My TV show platform{% endblock %}</title>
 </head>
+
 <body>
 
     <nav>
@@ -17,6 +47,7 @@
            {% if user.is_authenticated %}
            <li><a href="/search/">Search</a></li>
            <li><a href="/favorites/">Favorites</a></li>
+           <li><a href="/trending/">Trending</a></li>
            {% endif %}
            <li style="float:none"><a>My TV show Platform</a></li>
        </ul>
@@ -25,6 +56,8 @@
    <section id="content">
        {% block content %}{% endblock %}
    </section>
+
 <footer>&copy; My TV show Platform</footer>
+
 </body>
 </html>

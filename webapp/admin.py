@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import Serie
 from django.utils.text import Truncator
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 
 class SerieAdmin(admin.ModelAdmin):
     list_display = ('name','nb_seasons','genres','short_overview','next_episode','next_episode_date')
@@ -17,3 +19,23 @@ class SerieAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Serie,SerieAdmin)
+
+#from .models import Profil
+#
+#class ProfileInline(admin.StackedInline):
+#    model = Profil
+#    can_delete = False
+#    verbose_name_plural = 'Profil'
+#    fk_name = 'user'
+#
+#class CustomUserAdmin(UserAdmin):
+#    inlines = (ProfileInline, )
+#
+#    def get_inline_instances(self, request, obj=None):
+#        if not obj:
+#            return list()
+#        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
+#
+#
+#admin.site.unregister(User)
+#admin.site.register(User, CustomUserAdmin)

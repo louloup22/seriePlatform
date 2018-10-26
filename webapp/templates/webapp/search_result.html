@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+<!-- <head>
+	   <link rel="stylesheet" href="../../static/css/style.css" />
 
+</head> -->
 {% block content %}
 <h1>Search TV shows</h1>
 <form method="post" action=".">
@@ -14,13 +17,129 @@
 
 <h3>Find your series here:</h3>
 
-{% for el in html %}
-
-{{html | safe}}
-
-<button type="button">Click Me!</button>
 
 
+<!--
 
+<table>
+   <thead>  En-tête du tableau 
+      <tr>
+      	   <th></th>
+           <th>Name</th>
+           <th>Overview</th>
+           <th>Seasons</th>
+		   <th>Genres</th>
+		   <th>Next episode date</th>
+		   <th>Next episode</th>
+		   <th>Last episode date</th>
+		   <th>Last episode</th>
+		   <th>More info</th>
+		   <th></th>
+       </tr>
+   </thead>
+-->
+<!--
+   <tbody>Corps du tableau -->
+   {% for serie in dict_series.values %}
+		<!--<tr>
+		   <td>-->
+		   	<div class="container">
+		   	
+		   		<img src={{ serie.poster_path }} alt="Avatar" class="image" >
+		   	
+		   	<div class="middle" >
+		   		<div class="text" >		
+<a href="/serieinfo/{{ serie.id }}"> {{ serie.name }}</a></div>
+		   	</div>
+		   </div>
+		   
+		 <!--  </td>
+           <td>{{ serie.name }}</td>
+           <td>{{ serie.overview }}</td>
+           <td>{{ serie.nb_seasons }}</td>
+           <td>{{ serie.genres }}</td>
+		   <td>{{ serie.next_episode_date }}</td>
+		   <td>{{ serie.next_episode }}</td>
+		   <td>{{ serie.last_air_date }}</td>
+		   <td>{{ serie.last_air }}</td>
+		   <td><a href="/serieinfo/{{ serie.id }}"> More info</a></td>
+		   <td><button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button></a></td>
+       </tr>-->
+
+
+
+
+
+
+	{% endfor %}     
+<!-- </tbody>
+</table>
+-->
+
+<script>
+/*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
+var event = "click"; // Evenement que l on veut detecter
+// Qu'est ce que on execute lorsque "click" est généré dans mon element.
+var handler = function(e) {
+	console.log(e);
+	// Je veux envoyer une requette http (POST)
+	add_favorite({{serie.id}},{{user.id}});
+};
+element.addEventListener(event, handler);*/
+
+/*
+const sqlite3=require('sqlite3').verbose();
+let db = new sqlite3.Database('../db.sqlite3');
+
+let sql = `UPDATE webapp_profil
+            SET favorites = id
+            WHERE user_id = {{user_id}}`;
+
+db.run(sql, data, function(err) {
+  if (err) {
+    return console.error(err.message);
+  }
+  console.log(`Row(s) updated: ${this.changes}`);
+ 
+});
+ 
+// close the database connection
+db.close();
+*/
+
+
+function add_favorite(id,user_id) {
+    const Http = new XMLHttpRequest();
+	const url='/search/'+id+'/add_favorites/'+user_id;
+	Http.open("GET", url);
+	Http.send();
+
+	Http.onreadystatechange = function(e) {
+		console.log(Http);
+		console.log(Http.responseText);
+	};
+
+}
+
+
+/*
+
+	$.ajax({
+        data: data,
+        type: "POST",
+        // include URL
+        url: 'url/to/post/to',
+        // include response handler here
+        success: function(response) {
+            // do whatever you want with response
+            // you can just console.log(response.data) first
+        },
+        error: function(response) {
+            // error handler to failed AJAX requests
+        } 
+      });
+*/
+</script>
 {% endif %}
-{% endblock %}
+{% endblock %} 
+

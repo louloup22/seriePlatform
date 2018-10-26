@@ -8,7 +8,7 @@ Created on Thu Oct 11 20:02:21 2018
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from webapp.models import Search
+from webapp.models import Search,Profil
 
 class SignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional')

@@ -6,19 +6,31 @@
 <br />
 Your favorite series {{ user.username }}:
 
-{{html | safe}} 
-<!--<br />
+<!--{{html | safe}} -->
+
 <br />
-{% for serie in liste_dico_serie %}
-	<b><p>{{ serie.name }}</p></b>
+<br />
+{% for serie in dict_series.values %}
+	<div class="container">
+		   	
+		   		<img src={{ serie.poster_path }} alt="Avatar" class="image" >
+		   	
+		   	<div class="middle" >
+		   		<div class="text" >		
+			<a href="/serieinfo/{{ serie.id }}"> 
+		   		{{ serie.name }}</a></div>
+		   	</div>
+		   </div>
+<!-- 	<b><p> <a href="/serieinfo/{{ serie.id }}">{{ serie.name }}</a></p></b>
 	<p>{{ serie.overview }}</p>
 	<p>Next episode date :{{ serie.next_episode_date }}</p>
 	<p>Next episode :{{ serie.next_episode }}</p>
 	<p>Last episode date:{{ serie.last_episode_date }}</p>
 	<p>Last episode :{{ serie.last_episode }}</p>
-	<p><a href="{% url 'favorites' %}">More info</a></p>
+	<p><a href="/serieinfo/{{ serie.id }}"> More info</a></p> -->
 	<br />
-{% endfor %}-->
+
+{% endfor %}
 {% else %}
 Vous devez être connecté !
 {% endif %}

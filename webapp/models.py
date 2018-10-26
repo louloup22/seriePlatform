@@ -6,6 +6,10 @@ import requests
 from pandas import DataFrame as df
 from datetime import date
 import re
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+#import tkinter
+#import tkMessageBox
 
 
 class Search(models.Model):
@@ -13,6 +17,7 @@ class Search(models.Model):
     query = models.CharField(null = True, verbose_name = "Search", max_length=400)
     
     def _get_serie_by_name_with_space(self,query):
+        #20 results by page
         query=query.replace(" ","+")
         url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US"
         req =requests.get(url)
@@ -40,7 +45,7 @@ class Search(models.Model):
             url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
             req =requests.get(url)
             resp=json.loads(req.content)
-            print(resp)
+#            print(resp)
             dico["genres"]=resp["genres"]
             if resp['in_production']==False:
                 #question pour next air date pas forcément donné par l'API
@@ -79,9 +84,7 @@ class Search(models.Model):
                 dico["last_episode"]="{}x{}".format(season,episode)
             else:
                 dico["last_episode"]=None
-                
-        
-                
+
             #name
             dico["name"]=resp["name"]
             
@@ -89,6 +92,10 @@ class Search(models.Model):
             
             dico["nb_episodes"]=resp["number_of_episodes"]
             dico["nb_seasons"]=resp["number_of_seasons"]
+            if resp["poster_path"]!=None:
+                dico["poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+            else:
+                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
             dico['id']=tv_id[i]
             dict_series[dico['id']]=dico
         return dict_series
@@ -144,6 +151,10 @@ class Search(models.Model):
                 dico["last_episode"]="{}x{}".format(season,episode)
             else:
                 dico["last_episode"]=None
+            #top=tkinter.Tk()
+            
+            #dico["button"]=tkinter.Button(top,text="Add to Favourites",command=print( "Great"))
+            #dico["button"].pack()
             
             #dico['id']=tv_id[i]
             dict_series[tv_id[i]]=dico
@@ -154,8 +165,6 @@ class Search(models.Model):
             
         #html = dataframe.to_html()
         return dataframe
-    
-    
     
     
     def _get_attributes_for_serie_in_list(self,tv_id):
@@ -204,24 +213,77 @@ class Search(models.Model):
                 dico["last_episode"]="{}x{}".format(season,episode)
             else:
                 dico["last_episode"]=None
-                
-        
-                
+
             #name
-            dico["name"]=resp["name"]
-            
-            dico["overview"]=resp["overview"]
-            
+            dico["name"]=resp["name"]        
+            dico["overview"]=resp["overview"]        
             dico["nb_episodes"]=resp["number_of_episodes"]
             dico["nb_seasons"]=resp["number_of_seasons"]
+            dico["seasons"]=resp["seasons"]
+            if resp["poster_path"]!=None:
+                dico["poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+            else:
+                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
             dico['id']=tv_id[i]
             dict_series.append(dico)
         return dict_series
-    
-    
-    
 
+    def _get_attributes_for_season(self,tv_id,season_number):
+        dico={}
+        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+self.API_KEY+"&language=en-US"
+        req =requests.get(url)
+        resp=json.loads(req.content)
+        dico["name"]=resp["name"] #nom de la saison
+        dico["overview"]=resp["overview"]
+        dico["air_date"]=resp["air_date"]
+        dico["episodes"]=resp["episodes"]
+        return dico
 
+    def _get_series_trending_id(self):
+        url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page=1"
+        req =requests.get(url)
+        resp=json.loads(req.content)
+        results=resp["results"]
+        liste_id=[]
+        for show in results:
+            liste_id.append(show['id'])
+             
+        return liste_id
+
+    def _get_similar_series(self,tv_id):
+        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+self.API_KEY+"&language=en-US&page=1"
+        req =requests.get(url)
+        resp=json.loads(req.content)
+        results=resp["results"]
+        return results
+      
+    def _get_episodes_by_list(self,tv_id):
+        dict_series = []
+        for i in range(len(tv_id)):
+            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
+            req =requests.get(url)
+            resp=json.loads(req.content)
+            for j in range(len(resp["seasons"])):
+                url2="https://api.themoviedb.org/3/tv/"+str(resp["id"])+"/season/"+str(resp["seasons"][j]["season_number"])+"?api_key="+self.API_KEY+"&language=en-US"
+                req2 =requests.get(url2)
+                resp2=json.loads(req2.content)
+                for k in range(len(resp2["episodes"])):
+                    dico={}
+                    dico["serie_id"]=resp["id"]
+                    dico["serie_name"]=resp["name"]
+                    dico["serie_overview"]=resp["overview"]
+                    dico["serie_poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+                    dico["serie_nb_episodes"]=resp["number_of_episodes"]
+                    dico["serie_nb_seasons"]=resp["number_of_seasons"]
+                    dico["season_name"]=resp["seasons"][j]["name"]
+                    dico["season_number"]=resp["seasons"][j]["season_number"]
+                    dico["episode_air_date"]=resp2["episodes"][k]["air_date"]
+                    dico["episode_name"]=resp2["episodes"][k]["name"]
+                    dico["episode_overview"]=resp2["episodes"][k]["overview"]
+                    dico["episode_number"]=resp2["episodes"][k]["episode_number"]
+                    dict_series.append(dico)
+        return dict_series 
+    
 
 #id will be automatically generated by the model
 class Serie(models.Model):
@@ -261,7 +323,7 @@ class Serie(models.Model):
 
 class Profil(models.Model):
     user =  models.OneToOneField(User,on_delete=models.CASCADE) #liaison vers modèle User
-    favorites = models.TextField(null=True)
+    favorites = models.TextField(default='[]', null=True,blank=True)
     
     #faire un bouton add favorites qui permet d'appeler cette méthode
     #attention à la forme
@@ -287,6 +349,18 @@ class Profil(models.Model):
     def _remove_favorites(self,x):
         new_list = self._convert_favorites().pop(x)
         self.favorites = json.dumps(new_list)
+        
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profil.objects.create(user=instance)
+    instance.profil.save()
+
+#post_save.connect(create_user_profil, sender=User)
+    
+#    @receiver(post_save, sender=User)
+#    def save_user_profil(sender, instance, **kwargs):
+#        instance.profil.save()
         
     
 
