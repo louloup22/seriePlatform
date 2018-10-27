@@ -20,8 +20,13 @@ class SignUpForm(UserCreationForm):
         fields = ('username','first_name','last_name','email','password1','password2',)
 
 class SearchForm(forms.Form):
-    query = forms.CharField(max_length=30,required=True,help_text='Search TV shows here')
-    class Meta:
-        model = Search
-        fields = ('query',)
+    query = forms.CharField(max_length=30,required=True,label=None)
+    
+#    def __init__(self, *args, **kwargs):
+#        super(SearchForm,self).__init__(*args, **kwargs)
+#        self.fields['query'].label=None
+        
+#    class Meta:
+#        model = Search
+#        fields = ('query',)
         

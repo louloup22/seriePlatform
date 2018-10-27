@@ -1,15 +1,65 @@
 {% extends "base.html" %}
-<!-- <head>
-	   <link rel="stylesheet" href="../../static/css/style.css" />
 
-</head> -->
 {% block content %}
+
+
 <h1>Search TV shows</h1>
-<form method="post" action=".">
+<div class="searchbar">
+
+<form method="post" action="/search/">
     {% csrf_token %}
-    {{ form.as_p }}
+    <label for="{{ form.query.id_for_label }}"></label>
+  	{{ form.query }} 
+<!--     <label for="query"></label> -->
     <input type="submit" value="Search" />
 </form>
+</div>
+
+<!--      <form id='searchform' method='post'>
+    	{% csrf_token %} value="Search" 
+      <input id="query" type="text" placeholder="Search TV shows.." name="search" >
+      <button  onclick="getResult()">Search</button>
+     </form> 
+</div> -->
+
+<script>
+function getResult(){
+	window.location = '/search/'+ document.getElementById('query').value +"/1";
+}
+/*
+function getResult(){
+ 	const Http = new XMLHttpRequest();
+	const url='/search/'+ document.getElementByID('query').value +"/1";
+	Http.open("GET", url);
+	Http.send();
+
+	Http.onreadystatechange = function(e) {
+		console.log(Http);
+		console.log(Http.responseText);
+	};
+
+*/
+/*
+    var action_src = $("search").val();
+    console.log(action_src)
+    var your_form = $('searchform').val();
+    var deb_url = "/search/" 
+    var fin_url = "/1"
+    your_form.action = deb_url + action_src + fin_url;*/
+
+
+</script>
+
+
+
+<!-- <form method="post" action="/search/">
+    {% csrf_token %}
+    {{ form.as_p }} -->
+<!--     <input  id="search_box" type="text" name="search_box",value="Search">
+    <button type="submit" placeholder="Search.." value="Search">Search</button> -->
+<!--     <input type="submit" value="Search" />
+</form>
+</div> -->
 
 {% if envoi %}
 <h1>Results</h1>
@@ -78,10 +128,18 @@
 
 	{% endfor %}
 	</div>     
-<!-- </tbody>
-</table>
--->
+<h3>Browse pages</h3>
 
+{% if page == 1 %}
+<a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
+
+{% elif page == number_pages %}
+<a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+
+{% else %}
+<a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+<a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
+{% endif %}
 <script>
 /*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
 var event = "click"; // Evenement que l on veut detecter
