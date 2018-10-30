@@ -1,9 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-   <link rel="stylesheet" href="../static/css/style.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="{% static 'css/style.css' %}">
    <title>{% block title %}My TV show platform{% endblock %}</title>
 </head>
+
 <body>
 
     <nav>
@@ -16,6 +19,8 @@
             <li style="float:right"><a href="/logout/">Logout</a></li>
            {% if user.is_authenticated %}
            <li><a href="/search/">Search</a></li>
+           <li><a href="/favorites/">Favorites</a></li>
+           <li><a href="/trending/1">Trending</a></li>
            {% endif %}
            <li style="float:none"><a>My TV show Platform</a></li>
        </ul>
@@ -24,6 +29,8 @@
    <section id="content">
        {% block content %}{% endblock %}
    </section>
+<br/>
 <footer>&copy; My TV show Platform</footer>
+
 </body>
 </html>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Sign up page for My Serie Platform{% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
+
+<br />
+<h3>Most popular series:</h3>
+
+
+<!-- <table>
+   
+   <thead> --> <!-- En-tête du tableau -->
+      <!--  <tr>
+           <th>Name</th>
+           <th>Overview</th>
+           <th>Vote</th>
+		   <th>First air date</th>
+		   <th></th>
+       </tr>
+   </thead>
+
+   <tbody> --> <!-- Corps du tableau -->
+    <div class="wrapper">
+   {% for serie in dict_series %}
+
+
+
+   <div class="container">
+        
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
+        
+        <div class="middle" >
+          <div class="text" >   
+<a href="/serieinfo/{{ serie.id }}"> 
+          {{ serie.name }}</a></div>
+<br />
+<br />
+
+<!-- <div class="popup" onclick="show_popup()"> -->
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+<!-- <span class="popuptext" id="myPopup">Added to your favorites</span></div>
+ -->
+        </div>
+       </div>
+
+
+<!-- 		<tr>
+           <td>{{ serie.name }}</td>
+           <td>{{ serie.overview }}</td>
+           <td>{{ serie.vote_average }}</td>
+		   <td>{{ serie.first_air_date }}</td>
+		   <td><a href="/serieinfo/{{ serie.id }}"> More info</a></td>
+       </tr> -->
+	{% endfor %}  
+  </div>
+
+
+
+<h3>Browse pages</h3>
+
+{% if page == 1 %}
+<a href="/trending/{{next_page}}" class="next">Next &raquo;</a>
+
+{% elif page == number_pages %}
+<a href="/trending/{{previous_page}}" class="previous">&laquo; Previous</a>
+
+{% else %}
+<a href="/trending/{{previous_page}}" class="previous">&laquo; Previous</a>
+<a href="/trending/{{next_page}}" class="next">Next &raquo;</a>
+{% endif %}
+
+
+<script>
+/*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
+var event = "click"; // Evenement que l on veut detecter
+// Qu'est ce que on execute lorsque "click" est généré dans mon element.
+var handler = function(e) {
+  console.log(e);
+  // Je veux envoyer une requette http (POST)
+  add_favorite({{serie.id}},{{user.id}});
+};
+element.addEventListener(event, handler);*/
+
+function add_favorite(id,user_id) {
+
+/*  var button=document.getElementById("monBoutton");
+  button.style.backgroundColor = #f44336;*/
+
+  const Http = new XMLHttpRequest();
+  const url='/search/'+id+'/add_favorites/'+user_id;
+  Http.open("GET", url);
+  Http.send();
+
+  Http.onreadystatechange = function(e) {
+    console.log(Http);
+    console.log(Http.responseText);
+  };
+
+};
+
+/*function show_popup(){
+      var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+}
+*/
+
+</script>
+
+
+
+{% else %}
+Vous devez être connecté !
+{% endif %}
+{% endblock %}

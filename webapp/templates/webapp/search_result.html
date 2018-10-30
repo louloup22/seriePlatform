@@ -1,12 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+
 <h1>Search TV shows</h1>
-<form method="post" action=".">
+<div class="searchbar">
+
+<form method="post" action="/search/">
     {% csrf_token %}
-    {{ form.as_p }}
+    <label for="{{ form.query.id_for_label }}"></label>
+  	{{ form.query }} 
     <input type="submit" value="Search" />
 </form>
+</div>
+
+
+<script>
+function getResult(){
+	window.location = '/search/'+ document.getElementById('query').value +"/1";
+}
+
+</script>
+
 
 {% if envoi %}
 <h1>Results</h1>
@@ -14,7 +29,86 @@
 
 <h3>Find your series here:</h3>
 
-{{html | safe}} 
+   	<div class="wrapper">
+   {% for serie in resp %}
+		<!--<tr>
+		   <td>-->
+		   	<div class="container">
+		   	
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
 
+          
+      {% endif %}
+		   	
+		   	<div class="middle" >
+		   		<div class="text" >		
+<a href="/serieinfo/{{ serie.id }}"> {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}},{{serie.name}},{{serie.poster_path}})">Add to favourites !</button>
+
+		   	</div>
+		   </div>
+
+
+	{% endfor %}
+	</div>     
+<h3>Browse pages</h3>
+
+{% if page == 1 %}
+<a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
+
+{% elif page == number_pages %}
+<a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+
+{% else %}
+<a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+<a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
 {% endif %}
-{% endblock %}
+<script>
+/*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
+var event = "click"; // Evenement que l on veut detecter
+// Qu'est ce que on execute lorsque "click" est généré dans mon element.
+var handler = function(e) {
+	console.log(e);
+	// Je veux envoyer une requette http (POST)
+	add_favorite({{serie.id}},{{user.id}});
+};
+element.addEventListener(event, handler);*/
+
+
+function add_favorite(id,user_id,name,poster_path) {
+    const Http = new XMLHttpRequest();
+	const url='/search/'+id+'/add_favorites/'+user_id;
+	
+/*	$.ajax({
+		method: "POST",
+		url:'/search/'+id+'/add_favorites/'+user_id,
+		data:{name:name,poster_path:poster_path}
+	})
+	.done(function(msg){
+		alert('Data Saved: ' + msg)
+	})*/
+
+	Http.open("GET", url);
+	Http.send();
+
+	Http.onreadystatechange = function(e) {
+		console.log(Http);
+		console.log(Http.responseText);
+	};
+
+};
+
+
+
+
+
+</script>
+{% endif %}
+{% endblock %} 
+
