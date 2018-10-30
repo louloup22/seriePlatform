@@ -5,10 +5,10 @@ Created on Sun Oct 28 01:07:00 2018
 @author: t-lopica
 """
 
-
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
 from webapp.models import Search, Serie, Profil
+
 
 def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))

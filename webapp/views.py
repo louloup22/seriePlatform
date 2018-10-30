@@ -6,8 +6,10 @@ from pandas import DataFrame as df
 import pandas as pd
 from django.http import JsonResponse
 from django.template.context import RequestContext
-
 import numpy as np
+
+
+
 
 def home(request):
     search_class = Search('')

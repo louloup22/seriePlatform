@@ -223,7 +223,7 @@ h3{
 
 
 
-.popup button {
+.text button {
       transition: width 0.4s ease-in-out;
       width: 100%;
      padding: 6px;
@@ -235,14 +235,14 @@ h3{
     user-select: none;
 }
 
-.popup button:hover{
+.text button:hover{
     cursor: pointer;
     cursor: hand;
     box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 /*    background-color: red;*/
 }
 
-.popup button:focus{
+.text button:focus{
   background-color: red;
 }
 
