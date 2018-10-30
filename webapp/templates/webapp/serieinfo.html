@@ -37,7 +37,7 @@
 {% if serie_info.next_episode_date == None or serie_info.next_episode_date == 'Not known' %}
 <p style="margin-bottom: 2px"><b>No next episode scheduled</p>
 {% else %}
-<p style="margin-bottom: 2px"><b>Next episode : </b>{{ serie_info.next_episode }} on {{ serie_info.next_episode_date }}</p>
+<p style="margin-bottom: 2px"><b>Next episode : </b>{{ serie_info.next_episode }} on {{ serie_info.next_episode_date }} in {{serie_info.alert}} days</p>
 {% endif %}
 <p style="margin-top: 4px"><b>Last episode : </b>{{ serie_info.last_episode }} on {{ serie_info.last_episode_date }}</p>
 <p style="margin-bottom: 2px"><b>Seasons and episode Browser</b></p>
@@ -57,10 +57,17 @@
 <h3>Similar TV shows</h3>
 <br />
 <div class="wrapper">
-{% for serie in similar_series.values %}
+{% for serie in similar_series %}
+
 <div class="container">
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
         
-          <img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
         
         <div class="middle" >
           <div class="text" >   

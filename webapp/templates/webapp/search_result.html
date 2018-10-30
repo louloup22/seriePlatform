@@ -10,56 +10,18 @@
     {% csrf_token %}
     <label for="{{ form.query.id_for_label }}"></label>
   	{{ form.query }} 
-<!--     <label for="query"></label> -->
     <input type="submit" value="Search" />
 </form>
 </div>
 
-<!--      <form id='searchform' method='post'>
-    	{% csrf_token %} value="Search" 
-      <input id="query" type="text" placeholder="Search TV shows.." name="search" >
-      <button  onclick="getResult()">Search</button>
-     </form> 
-</div> -->
 
 <script>
 function getResult(){
 	window.location = '/search/'+ document.getElementById('query').value +"/1";
 }
-/*
-function getResult(){
- 	const Http = new XMLHttpRequest();
-	const url='/search/'+ document.getElementByID('query').value +"/1";
-	Http.open("GET", url);
-	Http.send();
-
-	Http.onreadystatechange = function(e) {
-		console.log(Http);
-		console.log(Http.responseText);
-	};
-
-*/
-/*
-    var action_src = $("search").val();
-    console.log(action_src)
-    var your_form = $('searchform').val();
-    var deb_url = "/search/" 
-    var fin_url = "/1"
-    your_form.action = deb_url + action_src + fin_url;*/
-
 
 </script>
 
-
-
-<!-- <form method="post" action="/search/">
-    {% csrf_token %}
-    {{ form.as_p }} -->
-<!--     <input  id="search_box" type="text" name="search_box",value="Search">
-    <button type="submit" placeholder="Search.." value="Search">Search</button> -->
-<!--     <input type="submit" value="Search" />
-</form>
-</div> -->
 
 {% if envoi %}
 <h1>Results</h1>
@@ -67,63 +29,30 @@ function getResult(){
 
 <h3>Find your series here:</h3>
 
-
-
-<!--
-
-<table>
-   <thead>  En-tête du tableau 
-      <tr>
-      	   <th></th>
-           <th>Name</th>
-           <th>Overview</th>
-           <th>Seasons</th>
-		   <th>Genres</th>
-		   <th>Next episode date</th>
-		   <th>Next episode</th>
-		   <th>Last episode date</th>
-		   <th>Last episode</th>
-		   <th>More info</th>
-		   <th></th>
-       </tr>
-   </thead>
--->
-<!--
-   <tbody>Corps du tableau -->
    	<div class="wrapper">
-   {% for serie in dict_series.values %}
+   {% for serie in resp %}
 		<!--<tr>
 		   <td>-->
 		   	<div class="container">
 		   	
-		   		<img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
 		   	
 		   	<div class="middle" >
 		   		<div class="text" >		
 <a href="/serieinfo/{{ serie.id }}"> {{ serie.name }}</a></div>
 <br />
 <br />
-<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}},{{serie.name}},{{serie.poster_path}})">Add to favourites !</button>
 
 		   	</div>
 		   </div>
-		   
-		 <!--  </td>
-           <td>{{ serie.name }}</td>
-           <td>{{ serie.overview }}</td>
-           <td>{{ serie.nb_seasons }}</td>
-           <td>{{ serie.genres }}</td>
-		   <td>{{ serie.next_episode_date }}</td>
-		   <td>{{ serie.next_episode }}</td>
-		   <td>{{ serie.last_air_date }}</td>
-		   <td>{{ serie.last_air }}</td>
-		   <td><a href="/serieinfo/{{ serie.id }}"> More info</a></td>
-		   <td><button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button></a></td>
-       </tr>-->
-
-
-
-
 
 
 	{% endfor %}
@@ -152,9 +81,19 @@ var handler = function(e) {
 element.addEventListener(event, handler);*/
 
 
-function add_favorite(id,user_id) {
+function add_favorite(id,user_id,name,poster_path) {
     const Http = new XMLHttpRequest();
 	const url='/search/'+id+'/add_favorites/'+user_id;
+	
+/*	$.ajax({
+		method: "POST",
+		url:'/search/'+id+'/add_favorites/'+user_id,
+		data:{name:name,poster_path:poster_path}
+	})
+	.done(function(msg){
+		alert('Data Saved: ' + msg)
+	})*/
+
 	Http.open("GET", url);
 	Http.send();
 
@@ -163,7 +102,10 @@ function add_favorite(id,user_id) {
 		console.log(Http.responseText);
 	};
 
-}
+};
+
+
+
 
 
 </script>

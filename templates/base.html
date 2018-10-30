@@ -3,33 +3,6 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!--
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-
-  body, html {
-    height: 100%;
-}
-
-.trial { 
-    /* The image used */
-    background-image: url("../static/img/my_tv_show.png"); 
-    
-
-    /* Full height */
-    height: 100%; 
-
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-</style>
--->
-   <!--<link rel="stylesheet" href="../static/css/style.css" />-->
    <link rel="stylesheet" href="{% static 'css/style.css' %}">
    <title>{% block title %}My TV show platform{% endblock %}</title>
 </head>
@@ -56,7 +29,7 @@
    <section id="content">
        {% block content %}{% endblock %}
    </section>
-
+<br/>
 <footer>&copy; My TV show Platform</footer>
 
 </body>

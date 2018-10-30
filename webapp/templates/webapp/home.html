@@ -7,7 +7,30 @@
 <h3>Series airing today:</h3>
 
     <div class="wrapper">
-   {% for serie in dict_series1.values %}
+{% for serie in dict_series1 %}
+ <div class="container">
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+      <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
+        
+        <div class="middle" >
+          <div class="text" >   
+<a href="/serieinfo/{{ serie.id }}"> 
+          {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+        </div>
+       </div>
+  {% endfor %}
+
+
+<!--    {% for serie in dict_series1.values %}
 
 
 
@@ -25,14 +48,48 @@
         </div>
        </div>
 
-	{% endfor %}  
+	{% endfor %}  --> 
   </div>
 
 <br />
 <h3>Series on air this week:</h3>
 
     <div class="wrapper">
-   {% for serie in dict_series2.values %}
+
+    <div class="wrapper">
+{% for serie in dict_series2 %}
+ <div class="container">
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+      <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
+        
+        <div class="middle" >
+          <div class="text" >   
+<a href="/serieinfo/{{ serie.id }}"> 
+          {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+        </div>
+       </div>
+  {% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+<!--    {% for serie in dict_series2.values %}
 
 
 
@@ -50,7 +107,7 @@
         </div>
        </div>
 
-  {% endfor %}  
+  {% endfor %}  --> 
   </div>
 
 

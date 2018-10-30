@@ -22,18 +22,23 @@ class Search(models.Model):
         url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
+        results=resp["results"]
         #print(resp)
-        return resp       
+        return results       
         
     def _get_number_of_result(self,query,page=1):
-        obj=self._get_serie_by_name_with_space(query,page)
-        print(obj['total_results'])
-        return obj['total_results']
+        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+        req =requests.get(url)
+        resp=json.loads(req.content)
+        print(resp['total_results'])
+        return resp['total_results']
     
     def _get_number_of_pages(self,query,page=1):
-        obj=self._get_serie_by_name_with_space(query,page)
-        print(obj['total_pages'])
-        return obj['total_pages']
+        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+        req =requests.get(url)
+        resp=json.loads(req.content)
+        print(resp['total_pages'])
+        return resp['total_pages']
     
     
     def _get_info_from_result(self, query,page=1):
@@ -87,8 +92,8 @@ class Search(models.Model):
                     dico["next_episode_date"]=None
                 else: 
                     if resp['next_episode_to_air']==None:
-                        dico["next_episode_date"]="Not known"
-                        dico["next_episode"]="Not known"
+                        dico["next_episode_date"]=None
+                        dico["next_episode"]=None
                     else:
                         next_air=resp["next_episode_to_air"]["air_date"]
                         liste=list(map(int,re.findall(r'\d+',next_air)))
@@ -98,6 +103,13 @@ class Search(models.Model):
                         episode=resp["next_episode_to_air"]["episode_number"]
                         dico["next_episode"]="{}x{}".format(season,episode)
                         
+                
+                today= date.today()
+                if  dico["next_episode_date"]!=None:
+                    dico["alert"]=dico["next_episode_date"]-today
+                else:
+                    dico['alert']=None
+                
                 
                 if resp["last_air_date"]!=None:        
                     last_air=resp["last_air_date"]
@@ -301,8 +313,8 @@ class Search(models.Model):
                 dico["next_episode_date"]=None
             else: 
                 if resp['next_episode_to_air']==None:
-                    dico["next_episode_date"]="Not known"
-                    dico["next_episode"]="Not known"
+                    dico["next_episode_date"]=None
+                    dico["next_episode"]=None
                 else:
                     next_air=resp["next_episode_to_air"]["air_date"]
                     liste=list(map(int,re.findall(r'\d+',next_air)))
@@ -312,6 +324,13 @@ class Search(models.Model):
                     episode=resp["next_episode_to_air"]["episode_number"]
                     dico["next_episode"]="{}x{}".format(season,episode)
                     
+            
+            today= date.today()
+            if  dico["next_episode_date"]!=None:
+                dico["alert"]=(dico["next_episode_date"]-today).days
+            else:
+                dico['alert']=None
+            
             
             if resp["last_air_date"]!=None:        
                 last_air=resp["last_air_date"]
@@ -372,7 +391,7 @@ class Search(models.Model):
             if i["poster_path"]!=None:
                     dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
             else:
-                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
+                dico["poster_path"]="/static/img/no_image_available.png"
             dico['name']=i['name']
             dict_series[dico['id']]=dico
         return dict_series
@@ -391,38 +410,40 @@ class Search(models.Model):
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        dict_series={}
-        for i in results:
-            dico={}
-            dico['id']=i['id']
-            if i["poster_path"]!=None:
-                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-            else:
-                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
-            dico['name']=i['name']
-            dict_series[dico['id']]=dico
-        #print(len(dict_series))
-        return dict_series
+#        dict_series={}
+#        for i in results:
+#            dico={}
+#            dico['id']=i['id']
+#            if i["poster_path"]!=None:
+#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
+#            else:
+#                dico["poster_path"]="/static/img/no_image_available.png"
+#            dico['name']=i['name']
+#            dict_series[dico['id']]=dico
+#        #print(len(dict_series))
+#        return dict_series
+        return results
     
     def _get_tv_airing_week(self,page=1):
         url=" https://api.themoviedb.org/3/tv/on_the_air?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        dict_series={}
-        for i in results:
-            dico={}
-#            print(i)
-
-            dico['id']=i['id']
-            if i["poster_path"]!=None:
-                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-            else:
-                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
-            dico['name']=i['name']
-            dict_series[dico['id']]=dico
-        #print(len(dict_series))
-        return dict_series
+#        dict_series={}
+#        for i in results:
+#            dico={}
+##            print(i)
+#
+#            dico['id']=i['id']
+#            if i["poster_path"]!=None:
+#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
+#            else:
+#                dico["poster_path"]="/static/img/no_image_available.png"
+#            dico['name']=i['name']
+#            dict_series[dico['id']]=dico
+#        #print(len(dict_series))
+#        return dict_series
+        return results
 
     def _get_number_of_trending_page(self,page=1):
         url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
@@ -432,38 +453,39 @@ class Search(models.Model):
         return number
 
     
-    def _get_series_trending_id(self,page=1):
+    def _get_series_trending(self,page=1):
         url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        dict_series={}
-        for i in results:
-            dico={}
-#            print(i)
-
-            dico['id']=i['id']
-            if i["poster_path"]!=None:
-                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-            else:
-                dico["poster_path"]="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
-            dico['name']=i['name']
-            dict_series[dico['id']]=dico
-        #print(len(dict_series))
-        return dict_series
+#        dict_series={}
+#        for i in results:
+#            dico={}
+##            print(i)
+#
+#            dico['id']=i['id']
+#            if i["poster_path"]!=None:
+#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
+#            else:
+#                dico["poster_path"]="/static/img/no_image_available.png"
+#            dico['name']=i['name']
+#            dict_series[dico['id']]=dico
+#        #print(len(dict_series))
+#        return dict_series
+        return results
 
 
 ##TODO: display more recommandation by chaning page
-    def _get_similar_series_ids(self,tv_id):
+    def _get_similar_series(self,tv_id):
         url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+self.API_KEY+"&language=en-US&page=1"
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        liste_id=[]
-        for show in results:
-            liste_id.append(show['id'])
+#        liste_id=[]
+#        for show in results:
+#            liste_id.append(show['id'])
         
-        return liste_id
+        return results
       
     def _get_episodes_by_list(self,tv_id):
         dict_series = []
@@ -494,16 +516,24 @@ class Search(models.Model):
     
 
 #id will be automatically generated by the model
-class Serie(models.Model):    
+class Serie(models.Model): 
+    serie_id = models.IntegerField(verbose_name = "Serie id",default=999999999)
     name = models.CharField(max_length=300, null = False)
     nb_episodes = models.IntegerField(verbose_name = "Total number of episodes")
     nb_seasons = models.IntegerField(verbose_name = "Total number of seasons")
-    genres = models.TextField()
+    genres = models.TextField(null=True)
     overview = models.TextField(null=True)
     last_episode_date = models.DateTimeField(verbose_name =  "Date of last episode", null = True)
     last_episode = models.CharField(max_length=10, verbose_name = "Last episode", null = True)
     next_episode_date = models.DateTimeField(verbose_name =  "Date of next episode", null = True)
     next_episode = models.CharField(max_length=10, verbose_name = "Next episode", null = True)
+    video = models.CharField(max_length=200, verbose_name = "Video path", null = True)
+    video_title = models.CharField(max_length=200, verbose_name = "Video title", null = True)
+    poster_path = models.CharField(max_length=200, verbose_name = "Poster path", null = True)
+    alert = models.IntegerField(verbose_name = "Days before next episode",default=None)
+    seasons = models.TextField(null=True, verbose_name = "Seasons and episodes info")
+    favorites_user = models.TextField(default='[]', null=True,blank=True)
+    
     
     class Meta:
         verbose_name = "Série"

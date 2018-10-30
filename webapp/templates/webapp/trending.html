@@ -21,13 +21,20 @@
 
    <tbody> --> <!-- Corps du tableau -->
     <div class="wrapper">
-   {% for serie in dict_series.values %}
+   {% for serie in dict_series %}
 
 
 
    <div class="container">
         
-          <img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
         
         <div class="middle" >
           <div class="text" >   
@@ -35,7 +42,11 @@
           {{ serie.name }}</a></div>
 <br />
 <br />
+
+<div class="popup" onclick="show_popup()">
 <button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+<span class="popuptext" id="myPopup">Added to your favorites</span></div>
+
         </div>
        </div>
 
@@ -78,7 +89,11 @@ var handler = function(e) {
 element.addEventListener(event, handler);*/
 
 function add_favorite(id,user_id) {
-    const Http = new XMLHttpRequest();
+
+/*  var button=document.getElementById("monBoutton");
+  button.style.backgroundColor = #f44336;*/
+
+  const Http = new XMLHttpRequest();
   const url='/search/'+id+'/add_favorites/'+user_id;
   Http.open("GET", url);
   Http.send();
@@ -88,8 +103,13 @@ function add_favorite(id,user_id) {
     console.log(Http.responseText);
   };
 
-}
+};
 
+/*function show_popup(){
+      var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+}
+*/
 
 </script>
 

@@ -29,7 +29,7 @@ def signup(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username = username, password = password)
             login(request,user)
-            return redirect('/search')
+            return redirect('/')
     else:
         form = SignUpForm()
     return render(request,'webapp/signup.html',locals())
@@ -62,7 +62,7 @@ def search_query(request,query,page_number=1):
     resp = search_class._get_serie_by_name_with_space(query,page=page_number)
     number_results = search_class._get_number_of_result(query,page=page_number)
     number_pages = search_class._get_number_of_pages(query,page=page_number)
-    dict_series = search_class._get_info_from_result(query,page=page_number)
+#    dict_series = search_class._get_info_from_result(query,page=page_number)
 #    while page<number_pages:
 #            page+=1
 #            resp = search_class._get_serie_by_name_with_space(query,page=page)
@@ -72,34 +72,9 @@ def search_query(request,query,page_number=1):
 
     return render(request,'webapp/search_result.html',locals())
 
-def add_favorite(request, id, user_id):
-    print("this is the id: {0}".format(id))
-    print("this is the user_id: {0}".format(user_id))
-    to_edit=Profil.objects.get(user_id=user_id)
-    if to_edit.favorites=='[]':
-        to_edit.favorites= '[{}]'.format(id)
-        to_edit.save()
-    else:
-        to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
-        print(to_edit)
-        if int(id) in to_edit.favorites:
-            pass
-        else:
-            to_edit.favorites.append(id)
-            to_edit.save()
-    
-    
-    return JsonResponse({'status':'OK'})
 
-    
-def remove_favorite(request, id, user_id):
-    print("this is the id: {0}".format(id))
-    print("this is the user_id: {0}".format(user_id))
-    to_edit=Profil.objects.get(user_id=user_id)
-    to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
-    to_edit.favorites.remove(id)
-    to_edit.save()
-    return JsonResponse({'status':'OK'})
+
+
 
 
 def display_favorites(request):
@@ -126,8 +101,8 @@ def genre(request,genre_id,genre_name,page_number=1):
 def serieinfo(request,serie_id):
     search_class = Search('')
     serie_info = search_class._get_attributes_for_serie_in_list([serie_id])[0]
-    ids = search_class._get_similar_series_ids(serie_id)
-    similar_series= search_class._get_attributes_for_serie(ids)
+    similar_series = search_class._get_similar_series(serie_id)
+#    similar_series= search_class._get_attributes_for_serie(ids)
     return render(request, 'webapp/serieinfo.html',locals())
 
 def seasoninfo(request,serie_id,season_number):
@@ -141,7 +116,7 @@ def trending(request,number_page=1):
     next_page=page+1
     search_class = Search('')
     number_pages=search_class._get_number_of_trending_page(page=1)
-    dict_series = search_class._get_series_trending_id(page=number_page)
+    dict_series = search_class._get_series_trending(page=number_page)
     return render(request, 'webapp/trending.html',locals())
 
 def profile(request):
