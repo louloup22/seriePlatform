@@ -17,7 +17,7 @@ def add_favorite(request, id, user_id):
     search_class = Search('hello')
     serie = search_class._get_attributes_for_serie_in_list([id])[0]
     print('this is the serie {}'.format(serie))
-    create_serie=Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'])
+    create_serie=Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'],genres=serie['genres'],overview=serie['overview'],last_episode_date=serie['last_episode_date'],last_episode=serie['last_episode'],next_episode_date=serie['next_episode_date'],next_episode=serie['next_episode'],video=serie['video'])
     create_serie.save()
     print(create_serie)
     
@@ -64,11 +64,7 @@ def remove_favorite(request, id, user_id):
     serie_change.save()
     
     
-    
-    
-    
-    
-    
+
     
     return JsonResponse({'status':'OK'})
 

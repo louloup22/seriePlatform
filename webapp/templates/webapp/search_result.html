@@ -3,10 +3,10 @@
 {% block content %}
 
 
-<h1>Search TV shows</h1>
-<div class="searchbar">
+<h1 style="margin-left: 2%;">Search TV shows by keywords</h1>
+<div class="searchbar" style="margin-left: 3%;">
 
-<form method="post" action="/search/">
+<form method="post" action="/search/" >
     {% csrf_token %}
     <label for="{{ form.query.id_for_label }}"></label>
   	{{ form.query }} 
@@ -24,15 +24,13 @@ function getResult(){
 
 
 {% if envoi %}
-<h1>Results</h1>
-{{ number_results }} responded to your search {{ query }} !<br />
+<!-- <h1>Results</h1> -->
+<h3 style="text-align: left ;margin-left: 2%;">{{ number_results }} TV shows obtained for {{ query }} : </h3>
 
-<h3>Find your series here:</h3>
+<!-- <h3>Find your series here:</h3> -->
 
    	<div class="wrapper">
    {% for serie in resp %}
-		<!--<tr>
-		   <td>-->
 		   	<div class="container">
 		   	
         {% if serie.poster_path == None  %}

@@ -3,7 +3,11 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Load an icon library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
    <title>{% block title %}My TV show platform{% endblock %}</title>
 </head>
 
@@ -13,21 +17,135 @@
        {% block nav %}
         
        <ul>
-            <li><a class="active" href="/">Home</a></li>
-            <li><a href="/signup/">Signup</a></li>
-            <li><a href="/login/">Login</a></li>
-            <li style="float:right"><a href="/logout/">Logout</a></li>
+            <li><a class="active" href="/"><i class="fa fa-fw fa-home"></i>Home</a></li>
+            <li><a href="/signup/"><i class="fa fa-fw fa-user-o"></i>Signup</a></li>
+            <li><a href="/login/"> <i class="fa fa-fw fa-user"></i>Login</a></li>
+            <li style="float:right"><a href="/logout/"><i class="fa fa-fw fa-power-off"></i></a></li>
+
+
+
+
            {% if user.is_authenticated %}
-           <li><a href="/search/">Search</a></li>
-           <li><a href="/favorites/">Favorites</a></li>
-           <li><a href="/trending/1">Trending</a></li>
+<!--            <div class="w3-dropdown-hover"> -->
+      <li style="float:right;height:2px"><a class="notification" href=#> <i class="fa fa-fw fa-bell"><span class="badge">{{nb_total}}</span></i></a>
+        <ul class="nav-dropdown" style="position: absolute;
+  z-index: 1;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 300px;display: none;right:50px;
+"> 
+{% if nb_soon != 0 %}
+  {% for serie in dict_soon.values %}
+
+<!--       <div class="w3-dropdown-content w3-bar-block w3-card-4"> -->
+        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
+    {% endfor %}
+    {% endif %}
+    {% if nb_now != 0 %}
+    {% for serie in dict_now.values %}
+        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
+
+     {% endfor %}
+    {% endif %}
+      </ul>
+      </li>
+
+
+
+<!-- 
+            <div class="collapse navbar-collapse">
+           <li class="nav-item dropdown" style="float:right">
+              <a class="nav-link text-light" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-fw fa-bell"></i>
+                  </a>
+
+
+
+            <div class="dropdown-container">
+
+              <div class="dropdown-toolbar">
+                <div class="dropdown-toolbar-actions">
+                  <a href="#">Mark all as read</a>
+                </div>
+                <h3 class="dropdown-toolbar-title">Notifications (2)</h3>
+              </div>
+
+              <ul class="dropdown-menu">
+                  ...
+              </ul>
+
+              <div class="dropdown-footer text-center">
+                <a href="#">View All</a>
+              </div>
+
+            </div>
+          </li> -->
+
+
+
+
+
+
+           <li><a href="/search/"><i class="fa fa-fw fa-search"></i>Search</a></li>
+           <li><a href="/favorites/"><i class="fa fa-fw fa-heart"></i>Favorites</a></li>
+           <li><a href="/trending/1"><i class="fa fa-fw fa-rocket"></i>Trending</a></li>
            {% endif %}
            <li style="float:none"><a>My TV show Platform</a></li>
+
+
+                  
+<script>
+  
+
+(function($) {
+
+  $(function() {
+
+    $('nav ul li > a:not(:only-child)').click(function(e) {
+
+      $(this).siblings('.nav-dropdown').toggle();
+
+      $('.nav-dropdown').not($(this).siblings()).hide();
+
+      e.stopPropagation();
+
+    });
+
+    $('html').click(function() {
+
+      $('.nav-dropdown').hide();
+
+    });
+
+  });
+
+  document.querySelector('#nav-toggle').addEventListener('click', function() {
+
+    this.classList.toggle('active');
+
+  });
+
+  $('#nav-toggle').click(function() {
+
+    $('nav ul').toggle();
+
+  });
+
+})(jQuery);
+
+
+</script>
+
+
        </ul>
+     </div>
+
        {% endblock %}
    </nav>
    <section id="content">
        {% block content %}{% endblock %}
+
+
+
+
    </section>
 <br/>
 <footer>&copy; My TV show Platform</footer>

@@ -25,13 +25,7 @@ Your favorite series {{ user.username }}:
 <button id="monBoutton" onclick="remove_favorite({{serie.id}}, {{user.id}})">Remove from favourites !</button>
 		   	</div>
 		   </div>
-<!-- 	<b><p> <a href="/serieinfo/{{ serie.id }}">{{ serie.name }}</a></p></b>
-	<p>{{ serie.overview }}</p>
-	<p>Next episode date :{{ serie.next_episode_date }}</p>
-	<p>Next episode :{{ serie.next_episode }}</p>
-	<p>Last episode date:{{ serie.last_episode_date }}</p>
-	<p>Last episode :{{ serie.last_episode }}</p>
-	<p><a href="/serieinfo/{{ serie.id }}"> More info</a></p> -->
+
 	<br />
 
 
@@ -41,15 +35,6 @@ Your favorite series {{ user.username }}:
 {% endfor %}
 </div>
 <script>
-/*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
-var event = "click"; // Evenement que l on veut detecter
-// Qu'est ce que on execute lorsque "click" est généré dans mon element.
-var handler = function(e) {
-	console.log(e);
-	// Je veux envoyer une requette http (POST)
-	add_favorite({{serie.id}},{{user.id}});
-};
-element.addEventListener(event, handler);*/
 
 
 function remove_favorite(id,user_id) {

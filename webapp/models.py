@@ -376,25 +376,34 @@ class Search(models.Model):
         dico["overview"]=resp["overview"]
         dico["air_date"]=resp["air_date"]
         dico["episodes"]=resp["episodes"]
+        if resp["poster_path"]!=None:
+                dico["poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+        else:
+            dico["poster_path"]="/static/img/no_image_available.png"
         return dico
     
  
+    
+    """Obtenir une liste de série d'un genre en particulier
+    Pour obtenir une liste assez significative sans avoir trop de résultats nous ne montrerons
+    que des séries ayant eu un épisode au moins depuis le 1er janvier 2012
+    """
     def _get_tv_by_genre(self,genre_id,page=1):
         url="https://api.themoviedb.org/3/discover/tv?api_key="+self.API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        dict_series={}
-        for i in results:
-            dico={}
-            dico['id']=i['id']
-            if i["poster_path"]!=None:
-                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-            else:
-                dico["poster_path"]="/static/img/no_image_available.png"
-            dico['name']=i['name']
-            dict_series[dico['id']]=dico
-        return dict_series
+#        dict_series={}
+#        for i in results:
+#            dico={}
+#            dico['id']=i['id']
+#            if i["poster_path"]!=None:
+#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
+#            else:
+#                dico["poster_path"]="/static/img/no_image_available.png"
+#            dico['name']=i['name']
+#            dict_series[dico['id']]=dico
+        return results
     
     def _get_genre_total_page(self,genre_id):
         url="https://api.themoviedb.org/3/discover/tv?api_key="+self.API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01"
@@ -403,25 +412,11 @@ class Search(models.Model):
         total_pages =resp['total_pages']
         return total_pages
         
-        
-        
     def _get_tv_airing_today(self,page=1):
         url="https://api.themoviedb.org/3/tv/airing_today?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-#        dict_series={}
-#        for i in results:
-#            dico={}
-#            dico['id']=i['id']
-#            if i["poster_path"]!=None:
-#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-#            else:
-#                dico["poster_path"]="/static/img/no_image_available.png"
-#            dico['name']=i['name']
-#            dict_series[dico['id']]=dico
-#        #print(len(dict_series))
-#        return dict_series
         return results
     
     def _get_tv_airing_week(self,page=1):
@@ -429,20 +424,6 @@ class Search(models.Model):
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-#        dict_series={}
-#        for i in results:
-#            dico={}
-##            print(i)
-#
-#            dico['id']=i['id']
-#            if i["poster_path"]!=None:
-#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-#            else:
-#                dico["poster_path"]="/static/img/no_image_available.png"
-#            dico['name']=i['name']
-#            dict_series[dico['id']]=dico
-#        #print(len(dict_series))
-#        return dict_series
         return results
 
     def _get_number_of_trending_page(self,page=1):
@@ -458,33 +439,15 @@ class Search(models.Model):
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-#        dict_series={}
-#        for i in results:
-#            dico={}
-##            print(i)
-#
-#            dico['id']=i['id']
-#            if i["poster_path"]!=None:
-#                    dico["poster_path"]="https://image.tmdb.org/t/p/w500"+i["poster_path"]
-#            else:
-#                dico["poster_path"]="/static/img/no_image_available.png"
-#            dico['name']=i['name']
-#            dict_series[dico['id']]=dico
-#        #print(len(dict_series))
-#        return dict_series
         return results
 
 
-##TODO: display more recommandation by chaning page
+##TODO: display more recommandation by changing page
     def _get_similar_series(self,tv_id):
         url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+self.API_KEY+"&language=en-US&page=1"
         req =requests.get(url)
         resp=json.loads(req.content)
-        results=resp["results"]
-#        liste_id=[]
-#        for show in results:
-#            liste_id.append(show['id'])
-        
+        results=resp["results"]        
         return results
       
     def _get_episodes_by_list(self,tv_id):

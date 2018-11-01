@@ -24,7 +24,7 @@ urlpatterns = [
                path('trending/<int:number_page>',views.trending, name = 'trending'),
                path('serieinfo/<int:serie_id>',views.serieinfo, name = 'serie_info'),
                path('serieinfo/<int:serie_id>/seasoninfo/<int:season_number>',views.seasoninfo, name = 'season_info'),
-               path('profile/',views.profile, name = 'profile'),
+               # path('profile/',views.profile, name = 'profile'),
                path('genre/<str:genre_name>/<int:genre_id>/<int:page_number>',views.genre,name='genre')
         ]
 
