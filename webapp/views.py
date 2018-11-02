@@ -1,0 +1,194 @@
+from django.shortcuts import render,redirect
+from django.contrib.auth import login, authenticate
+from webapp.forms import SignUpForm, SearchForm
+from webapp.models import Search, Serie, Profil
+from pandas import DataFrame as df
+import pandas as pd
+from django.http import JsonResponse
+from django.template.context import RequestContext
+import numpy as np
+from threading import Thread
+from webapp.models import SearchThread
+
+
+
+
+def home(request):
+    #search_class = Search('')
+    #number_pages=search_class._get_number_of_trending_page(page=1)
+    dict_seriesT1 = SearchThread(Search.get_tv_airing_today)
+    dict_seriesT2 = SearchThread(Search.get_tv_airing_week)
+    dict_seriesT1.start()
+    dict_seriesT2.start()
+    dict_seriesT1.join()
+    dict_seriesT2.join()
+    dict_series1 = dict_seriesT1.result()
+    dict_series2 = dict_seriesT2.result()
+    return render(request, 'webapp/home.html',locals())
+
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user=form.save()
+            user.refresh_from_db() 
+            user.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username = username, password = password)
+            login(request,user)
+            return redirect('/')
+    else:
+        form = SignUpForm()
+    return render(request,'webapp/signup.html',locals())
+
+def search(request):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data.get('query')
+            print('/search/'+query)
+            envoi = True
+            return redirect('/search/'+query+'/1')
+    else:
+        form = SearchForm()
+            
+    return render(request,'webapp/search_result.html',locals())
+        
+
+def search_query(request,query,page_number=1):
+    form = SearchForm()
+    page=page_number
+    previous_page=page-1
+    next_page=page+1
+    envoi = True
+    
+    #search_class = Search(query)
+    
+    #on s'occupe de la page 1
+    #page=1
+    respT=SearchThread(Search.get_serie_by_name_with_space, query, page)
+    number_resultsT=SearchThread(Search.get_number_of_result,query,page)
+    number_pagesT=SearchThread(Search.get_number_of_pages, query,page)
+    respT.start()
+    number_resultsT.start()
+    number_pagesT.start()
+    respT.join()
+    number_resultsT.join()
+    number_pagesT.join()
+    resp = respT.result()
+    number_results = number_resultsT.result()
+    number_pages = number_pagesT.result()
+    #resp = Search.get_serie_by_name_with_space(query,page=page_number)
+    #number_results = Search.get_number_of_result(query,page=page_number)
+    #number_pages = Search.get_number_of_pages(query,page=page_number)
+#    dict_series = search_class._get_info_from_result(query,page=page_number)
+#    while page<number_pages:
+#            page+=1
+#            resp = search_class._get_serie_by_name_with_space(query,page=page)
+#            dict_series = {**dict_series,**search_class._get_info_from_result(query,page=page)}
+#    if request.method == 'POST':
+#        form = SearchForm(request.POST)
+
+    return render(request,'webapp/search_result.html',locals())
+
+
+
+
+
+
+def display_favorites(request):
+    this_user=request.user.profil
+    #search_class = Search('hello')
+    if this_user.favorites=='[]':
+        dict_seriesT = SearchThread(Search.get_attributes_for_serie, [])
+        dict_seriesT.start()
+        dict_seriesT.join()
+        dict_series = dict_seriesT.result()
+        #dict_series = Search.get_attributes_for_serie([])
+    else:        
+        favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
+        dict_seriesT = SearchThread(Search.get_attributes_for_serie, favorite_seriesid)
+        dict_seriesT.start()
+        dict_seriesT.join()
+        dict_series = dict_seriesT.result()
+        #dict_series = Search.get_attributes_for_serie(favorite_seriesid)    
+    return render(request, 'webapp/favorites.html',locals())
+
+def genre(request,genre_id,genre_name,page_number=1):
+    #search_class = Search('')
+    name=genre_name
+    page=page_number
+    previous_page=page_number-1
+    next_page=page_number+1
+    number_pageT=SearchThread(Search.get_genre_total_page, genre_id)
+    dict_seriesT = SearchThread(Search.get_tv_by_genre, genre_id, page)
+    number_pageT.start()
+    dict_seriesT.start()
+    number_pageT.join()
+    dict_seriesT.join()
+    number_page=number_pageT.result()
+    dict_series=dict_seriesT.result()
+    #dict_series = Search.get_tv_by_genre(genre_id,page=page_number)
+    return render(request,'webapp/genre.html',locals())
+
+
+def serieinfo(request,serie_id):
+    #search_class = Search('')
+    serie_infoT=SearchThread(Search.get_attributes_for_serie_in_list, [serie_id])
+    similar_seriesT=SearchThread(Search.get_similar_series, serie_id)
+    serie_infoT.start()
+    similar_seriesT.start()
+    serie_infoT.join()
+    similar_seriesT.join()
+    serie_info=serie_infoT.result()[0]
+    similar_series = similar_seriesT.result()
+    #serie_info = Search.get_attributes_for_serie_in_list([serie_id])[0]
+    #similar_series = Search.get_similar_series(serie_id)
+#    similar_series= search_class._get_attributes_for_serie(ids)
+    return render(request, 'webapp/serieinfo.html',locals())
+
+def seasoninfo(request,serie_id,season_number):
+    #search_class = Search('')
+    season_infoT=SearchThread(Search.get_attributes_for_season, serie_id, season_number)
+    season_infoT.start()
+    season_infoT.join()
+    season_info=season_infoT.result()
+    #season_info = Search.get_attributes_for_season(serie_id,season_number)
+    return render(request, 'webapp/seasoninfo.html',locals())
+
+def trending(request,number_page=1):
+    page=number_page
+    previous_page=page-1
+    next_page=page+1
+    #search_class = Search('')
+    number_pagesT=SearchThread(Search.get_number_of_trending_page, page)
+    dict_seriesT=SearchThread(Search.get_series_trending, page)
+    number_pagesT.start()
+    dict_seriesT.start()
+    number_pagesT.join()
+    dict_seriesT.join()
+    number_pages = number_pagesT.result()
+    dict_series=dict_seriesT.result()
+    #number_pages=Search.get_number_of_trending_page(page=1)
+    #dict_series = Search.get_series_trending(page=number_page)
+    return render(request, 'webapp/trending.html',locals())
+
+def profile(request):
+    #search_class = Search('')
+    favorite_seriesid=[71446,66732]
+    results = Search.get_episodes_in_list(favorite_seriesid)
+    #results = search_class._get_attributes_for_serie(favorite_seriesid)
+    incoming_episodes=[]
+    recent_episodes=[]
+    #for i in range(len(results)):
+    #    if datetime.date(int(results[i]["episode_air_date"][0:4]),int(results[i]["episode_air_date"][5:7]),int(results[i]["episode_air_date"][8:10])-datetime.date.today():
+            
+    return render(request, 'webapp/trending.html',locals())
+
+
+        
+            
+            

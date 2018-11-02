@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Sign up page for My Serie Platform{% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
+
+<br />
+<h3>Find more {{name}} </h3>
+
+    <div class="wrapper">
+   {% for serie in dict_series.values %}
+
+
+
+   <div class="container">
+        
+          <img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        
+        <div class="middle" >
+          <div class="text" >   
+<a href="/serieinfo/{{ serie.id }}"> 
+          {{ serie.name }}</a></div>
+<br />
+<br />
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
+        </div>
+       </div>
+
+	{% endfor %}  
+  </div>
+
+<br />
+
+<h3>Browse pages</h3>
+
+{% if page == 1 %}
+<a href="/genre/{{name}}/{{genre_id}}/{{next_page}}" class="next">Next &raquo;</a>
+
+{% elif page == number_pages %}
+<a href="/genre/{{name}}/{{genre_id}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+
+{% else %}
+<a href="/genre/{{name}}/{{genre_id}}/{{previous_page}}" class="previous">&laquo; Previous</a>
+<a href="/genre/{{name}}/{{genre_id}}/{{next_page}}" class="next">Next &raquo;</a>
+{% endif %}
+
+
+
+<script>
+function add_favorite(id,user_id) {
+    const Http = new XMLHttpRequest();
+  const url='/search/'+id+'/add_favorites/'+user_id;
+  Http.open("GET", url);
+  Http.send();
+
+  Http.onreadystatechange = function(e) {
+    console.log(Http);
+    console.log(Http.responseText);
+  };
+
+}
+
+
+
+
+</script>
+
+
+
+{% else %}
+Vous devez être connecté !
+{% endif %}
+{% endblock %}

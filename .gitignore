@@ -1,0 +1,8 @@
+.DS_Store
+.gitignore
+SeriePlatform1/__pycache__/
+webapp/__pycache__/
+webapp/config.py
+webapp/migrations/__pycache__/
+Notes.txt
+search.py
