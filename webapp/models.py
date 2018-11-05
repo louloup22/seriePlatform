@@ -8,42 +8,71 @@ from datetime import date
 import re
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-#import tkinter
-#import tkMessageBox
+from threading import Thread
+
+
+#On importe en premier lieu la clé de l'API qu'on a préalablement enregistrée dans le fichier config.py
+API_KEY = config.API_KEY
+#On définit le format des demandes autorisées
+query = models.CharField(null = True, verbose_name = "Search", max_length=400)
+
+#La classe SearchThread va nous permettre de faire tourner des threads dès que nous allons réaliser une demande à l'API,
+#optimisant ainsi le temps d'exécution puisque nous pourrons faire tourner plusieurs threads en même temps selon des méthodes différentes.
+
+class SearchThread(Thread):
+
+#Chaque thread a pour argument en entrée une méthode (le plus souvent de la classe Search) et une liste d'arguments non prédéfinis (d'où l'utilisation de *args)
+    def __init__(self, method, *args):
+        Thread.__init__(self)
+        self.method = method
+        self.args=args
+        self.results = None
+
+#La fonction run du thread enregistre le résultat de la méthode employée dans self.results.        
+    def run(self):
+        self.results = self.method(*self.args)
+        #self.results.type = self.method(*args).type
+
+#La fonction result nous permet de récupérer le résultat du thread et ainsi de le réutiliser dans le code.
+    def result(self):
+        return self.results
+
+#La classe Search va regrouper les différentes méthodes, notamment d'appel à l'API, qui nous permettent d'obtenir les informations sur les séries
+# et ceci selon différents arguments d'entrée. C'est une classe statique et publique dont les méthodes seront utilisées dans les Threads.
 
 
 class Search(models.Model):
-    API_KEY = models.CharField(default=config.API_KEY, null = False, max_length=500)
-    query = models.CharField(null = True, verbose_name = "Search", max_length=400)
+    #API_KEY = models.CharField(default=config.API_KEY, null = False, max_length=500)
+    #query = models.CharField(null = True, verbose_name = "Search", max_length=400)
     
-    def _get_serie_by_name_with_space(self,query,page=1):
+    def get_serie_by_name_with_space(query,page=1):
         #20 results by page
         query=query.replace(" ","+")
-        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
         #print(resp)
         return results       
         
-    def _get_number_of_result(self,query,page=1):
-        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_number_of_result(query,page=1):
+        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         print(resp['total_results'])
         return resp['total_results']
     
-    def _get_number_of_pages(self,query,page=1):
-        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_number_of_pages(query,page=1):
+        url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         print(resp['total_pages'])
         return resp['total_pages']
     
     
-    def _get_info_from_result(self, query,page=1):
+    def get_info_from_result(query,page=1):
         dict_series={}
-        obj=self._get_serie_by_name_with_space(query,page)
+        obj=get_serie_by_name_with_space(query,page)
         for i in obj["results"]:
             dico={}
 #            print(i)
@@ -58,16 +87,16 @@ class Search(models.Model):
         #print(len(dict_series))
         return dict_series
     
-    def _get_id_from_result(self, query,page=1):
+    def get_id_from_result(query,page=1):
         liste_id=[]
-        obj=self._get_serie_by_name_with_space(query,page)
+        obj=get_serie_by_name_with_space(query,page)
         for i in obj["results"]:
             #print(type(i['id']))
             liste_id.append(i['id'])
         print(len(liste_id))
         return liste_id
     
-    def _get_attributes_for_serie(self,tv_id):
+    def get_attributes_for_serie(tv_id):
         number_ids=len(tv_id)
         print(number_ids)
         #il y a 20 ids par pages
@@ -83,7 +112,7 @@ class Search(models.Model):
             print("il n'y a qu'une page")
             for i in range(number_ids):
                 dico={}
-                url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
+                url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+API_KEY+"&language=en-US"
                 req =requests.get(url)
                 resp=json.loads(req.content)
                 dico["genres"]=resp["genres"]
@@ -155,7 +184,7 @@ class Search(models.Model):
                 for i in range((page-1)*20,page*20):
     #        for i in range(len(tv_id)):
                     dico={}
-                    url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+                    url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+API_KEY+"&language=en-US&page="+str(page)
                     req =requests.get(url)
                     resp=json.loads(req.content)
         #            print(resp)
@@ -216,7 +245,7 @@ class Search(models.Model):
                 
             for i in range((page-1)*20,number_ids):
                 dico={}
-                url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+                url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+API_KEY+"&language=en-US&page="+str(page)
                 req =requests.get(url)
                 resp=json.loads(req.content)
     #            print(resp)
@@ -276,12 +305,12 @@ class Search(models.Model):
     
     
     
-    def _get_attributes_for_serie_in_list(self,tv_id):
+    def get_attributes_for_serie_in_list(tv_id):
         dict_series = []
         for i in range(len(tv_id)):
             dico={}
-            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
-            url_video="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"/videos?api_key="+self.API_KEY+"&language=en-US"
+            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+API_KEY+"&language=en-US"
+            url_video="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"/videos?api_key="+API_KEY+"&language=en-US"
             req =requests.get(url)
             resp=json.loads(req.content)
             reqvideo=requests.get(url_video)
@@ -311,8 +340,13 @@ class Search(models.Model):
             if resp['in_production']==False:
                 #question pour next air date pas forcément donné par l'API
                 dico["next_episode_date"]=None
+                dico["next_episode"]=None
             else: 
+                #print("This is next episode to air : {}".format(resp['next_episode_to_air']))
                 if resp['next_episode_to_air']==None:
+                    dico["next_episode_date"]=None
+                    dico["next_episode"]=None
+                elif resp['next_episode_to_air']=="null":
                     dico["next_episode_date"]=None
                     dico["next_episode"]=None
                 else:
@@ -329,7 +363,7 @@ class Search(models.Model):
             if  dico["next_episode_date"]!=None:
                 dico["alert"]=(dico["next_episode_date"]-today).days
             else:
-                dico['alert']=None
+                dico['alert']=999999
             
             
             if resp["last_air_date"]!=None:        
@@ -367,9 +401,9 @@ class Search(models.Model):
             dict_series.append(dico)
         return dict_series
 
-    def _get_attributes_for_season(self,tv_id,season_number):
+    def get_attributes_for_season(tv_id,season_number):
         dico={}
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+self.API_KEY+"&language=en-US"
+        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+API_KEY+"&language=en-US"
         req =requests.get(url)
         resp=json.loads(req.content)
         dico["name"]=resp["name"] #nom de la saison
@@ -388,8 +422,8 @@ class Search(models.Model):
     Pour obtenir une liste assez significative sans avoir trop de résultats nous ne montrerons
     que des séries ayant eu un épisode au moins depuis le 1er janvier 2012
     """
-    def _get_tv_by_genre(self,genre_id,page=1):
-        url="https://api.themoviedb.org/3/discover/tv?api_key="+self.API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01&page="+str(page)
+    def get_tv_by_genre(genre_id,page=1):
+        url="https://api.themoviedb.org/3/discover/tv?api_key="+API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
@@ -405,37 +439,37 @@ class Search(models.Model):
 #            dict_series[dico['id']]=dico
         return results
     
-    def _get_genre_total_page(self,genre_id):
-        url="https://api.themoviedb.org/3/discover/tv?api_key="+self.API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01"
+    def get_genre_total_page(genre_id):
+        url="https://api.themoviedb.org/3/discover/tv?api_key="+API_KEY+"&language=en-US&with_genres="+str(genre_id)+"&air_date.gte=2012-01-01"
         req =requests.get(url)
         resp=json.loads(req.content)
         total_pages =resp['total_pages']
         return total_pages
         
-    def _get_tv_airing_today(self,page=1):
-        url="https://api.themoviedb.org/3/tv/airing_today?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_tv_airing_today(page=1):
+        url="https://api.themoviedb.org/3/tv/airing_today?api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
         return results
     
-    def _get_tv_airing_week(self,page=1):
-        url=" https://api.themoviedb.org/3/tv/on_the_air?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_tv_airing_week(page=1):
+        url=" https://api.themoviedb.org/3/tv/on_the_air?api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
         return results
 
-    def _get_number_of_trending_page(self,page=1):
-        url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_number_of_trending_page(page=1):
+        url="https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp =json.loads(req.content)
         number= resp['total_pages']
         return number
 
     
-    def _get_series_trending(self,page=1):
-        url="https://api.themoviedb.org/3/tv/popular?api_key="+self.API_KEY+"&language=en-US&page="+str(page)
+    def get_series_trending(page=1):
+        url="https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
@@ -443,21 +477,21 @@ class Search(models.Model):
 
 
 ##TODO: display more recommandation by changing page
-    def _get_similar_series(self,tv_id):
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+self.API_KEY+"&language=en-US&page=1"
+    def get_similar_series(tv_id):
+        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+API_KEY+"&language=en-US&page=1"
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]        
         return results
       
-    def _get_episodes_by_list(self,tv_id):
+    def get_episodes_by_list(tv_id):
         dict_series = []
         for i in range(len(tv_id)):
-            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+self.API_KEY+"&language=en-US"
+            url="https://api.themoviedb.org/3/tv/"+str(tv_id[i])+"?api_key="+API_KEY+"&language=en-US"
             req =requests.get(url)
             resp=json.loads(req.content)
             for j in range(len(resp["seasons"])):
-                url2="https://api.themoviedb.org/3/tv/"+str(resp["id"])+"/season/"+str(resp["seasons"][j]["season_number"])+"?api_key="+self.API_KEY+"&language=en-US"
+                url2="https://api.themoviedb.org/3/tv/"+str(resp["id"])+"/season/"+str(resp["seasons"][j]["season_number"])+"?api_key="+API_KEY+"&language=en-US"
                 req2 =requests.get(url2)
                 resp2=json.loads(req2.content)
                 for k in range(len(resp2["episodes"])):
@@ -493,9 +527,9 @@ class Serie(models.Model):
     video = models.CharField(max_length=200, verbose_name = "Video path", null = True)
     video_title = models.CharField(max_length=200, verbose_name = "Video title", null = True)
     poster_path = models.CharField(max_length=200, verbose_name = "Poster path", null = True)
-    alert = models.IntegerField(verbose_name = "Days before next episode",default=None)
     seasons = models.TextField(null=True, verbose_name = "Seasons and episodes info")
     favorites_user = models.TextField(default='[]', null=True,blank=True)
+    alert = models.IntegerField(verbose_name = "Days before next episode",default=999999, null=True,blank=True)
     
     
     class Meta:

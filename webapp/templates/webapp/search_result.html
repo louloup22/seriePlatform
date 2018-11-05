@@ -47,7 +47,7 @@ function getResult(){
 <a href="/serieinfo/{{ serie.id }}"> {{ serie.name }}</a></div>
 <br />
 <br />
-<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}},{{serie.name}},{{serie.poster_path}})">Add to favourites !</button>
+<button id="monBoutton" onclick="add_favorite({{serie.id}}, {{user.id}})">Add to favourites !</button>
 
 		   	</div>
 		   </div>
@@ -67,6 +67,9 @@ function getResult(){
 <a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
 <a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
 {% endif %}
+
+
+
 <script>
 /*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
 var event = "click"; // Evenement que l on veut detecter
@@ -79,26 +82,18 @@ var handler = function(e) {
 element.addEventListener(event, handler);*/
 
 
-function add_favorite(id,user_id,name,poster_path) {
-    const Http = new XMLHttpRequest();
-	const url='/search/'+id+'/add_favorites/'+user_id;
-	
-/*	$.ajax({
-		method: "POST",
-		url:'/search/'+id+'/add_favorites/'+user_id,
-		data:{name:name,poster_path:poster_path}
-	})
-	.done(function(msg){
-		alert('Data Saved: ' + msg)
-	})*/
+function add_favorite(id,user_id) {
 
-	Http.open("GET", url);
-	Http.send();
 
-	Http.onreadystatechange = function(e) {
-		console.log(Http);
-		console.log(Http.responseText);
-	};
+  const Http = new XMLHttpRequest();
+  const url='/search/'+id+'/add_favorites/'+user_id;
+  Http.open("GET", url);
+  Http.send();
+
+  Http.onreadystatechange = function(e) {
+    console.log(Http);
+    console.log(Http.responseText);
+  };
 
 };
 

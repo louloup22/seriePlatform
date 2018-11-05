@@ -32,6 +32,12 @@
   z-index: 1;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 300px;display: none;right:50px;
 "> 
+    {% if nb_now != 0 %}
+    {% for serie in dict_now.values %}
+        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} day</a></li>
+
+     {% endfor %}
+    {% endif %}
 {% if nb_soon != 0 %}
   {% for serie in dict_soon.values %}
 
@@ -39,50 +45,9 @@
         <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
     {% endfor %}
     {% endif %}
-    {% if nb_now != 0 %}
-    {% for serie in dict_now.values %}
-        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
 
-     {% endfor %}
-    {% endif %}
       </ul>
       </li>
-
-
-
-<!-- 
-            <div class="collapse navbar-collapse">
-           <li class="nav-item dropdown" style="float:right">
-              <a class="nav-link text-light" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-fw fa-bell"></i>
-                  </a>
-
-
-
-            <div class="dropdown-container">
-
-              <div class="dropdown-toolbar">
-                <div class="dropdown-toolbar-actions">
-                  <a href="#">Mark all as read</a>
-                </div>
-                <h3 class="dropdown-toolbar-title">Notifications (2)</h3>
-              </div>
-
-              <ul class="dropdown-menu">
-                  ...
-              </ul>
-
-              <div class="dropdown-footer text-center">
-                <a href="#">View All</a>
-              </div>
-
-            </div>
-          </li> -->
-
-
-
-
-
 
            <li><a href="/search/"><i class="fa fa-fw fa-search"></i>Search</a></li>
            <li><a href="/favorites/"><i class="fa fa-fw fa-heart"></i>Favorites</a></li>
@@ -96,41 +61,23 @@
   
 
 (function($) {
-
   $(function() {
-
     $('nav ul li > a:not(:only-child)').click(function(e) {
-
       $(this).siblings('.nav-dropdown').toggle();
-
       $('.nav-dropdown').not($(this).siblings()).hide();
-
       e.stopPropagation();
-
     });
-
     $('html').click(function() {
-
       $('.nav-dropdown').hide();
-
     });
-
   });
-
   document.querySelector('#nav-toggle').addEventListener('click', function() {
-
     this.classList.toggle('active');
-
   });
-
   $('#nav-toggle').click(function() {
-
     $('nav ul').toggle();
-
   });
-
 })(jQuery);
-
 
 </script>
 
@@ -148,7 +95,15 @@
 
    </section>
 <br/>
-<footer>&copy; My TV show Platform</footer>
+
+<div class="end" style="background-color: aliceblue">
+<h4>My TV show platform</h4>
+<p style="font-style: italic;">Find all your favorite TV shows and discover new trending TV shows to watch ! Stay tuned with notifications letting you know when will be aired next episodes of your favorite series !</p>
+<a href=""><i class="fa fa-fw fa-phone"></i>Contact</a>
+
+<footer>&copy; My TV show Platform - copyright 2018
+</footer>
+</div>
 
 </body>
 </html>
