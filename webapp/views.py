@@ -39,7 +39,7 @@ def home(request):
         this_user = request.user.profil
         # search_class = Search('hello')
         if this_user.favorites == '[]':
-            dict_series = Search.get_attributes_for_serie([])
+            dict_series = {}
         else:
             dict_soon = {} 
             dict_now = {}       
@@ -92,38 +92,63 @@ def search(request):
     else:
         form = SearchForm()
 
-
+    # capte l'utilisateur connecté
     this_user = request.user.profil
     # search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = Search.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}   
 
-#METTRE DES THREADS !!
+        favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
+        threads=[]
+        for ids in favorite_seriesid:
+            # this_serie = Serie.objects.get(id = el)
+            update_serie = SearchThread(Search.get_attributes_for_serie, ids)
+            update_serie.start()
+            threads.append(update_serie)
+        for thread in threads:
+            thread.join()
+        dict_series= [thread.result() for thread in threads]
 
-        # favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
-        # dict_seriesT = SearchThread(Search.get_attributes_for_serie, favorite_seriesid)
-        # dict_seriesT.start()
-        # dict_seriesT.join()
-        # dict_series = dict_seriesT.result()
-
-        for item in this_user.favorites[1:-1].split(','): 
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            update_serie = Search.get_attributes_for_serie_in_list([item])[0]
-            # print(update_serie[item])
-            this_serie.alert = update_serie['alert']
+        for el in dict_series:
+            this_serie = Serie.objects.get(id = el['id'])
+            print("1er essai {}".format(this_serie))
+            this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
+            print("2eme essai {}".format(this_serie))
             this_serie.save()
+
             if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
+                dict_soon[el['id']] = this_serie
             elif this_serie.alert < 2:
-                dict_now[item] = this_serie
+                dict_now[el['id']] = this_serie
 
         nb_soon = len(dict_soon)
         nb_now = len(dict_now)
         nb_total = nb_soon + nb_now
+
+
+        
+
+        # for item in this_user.favorites[1:-1].split(','): 
+        #     item = int(item)
+        #     #ligne de la table Serie qui contient l'id de la série favorite de l'utilisateur
+        #     this_serie = Serie.objects.get(id = item)
+
+            
+        #     update_serie = Search.get_attributes_for_serie_in_list(item)
+        #     this_serie = this_serie.update_serie(update_serie['nb_episodes'], update_serie['nb_seasons'], update_serie['last_episode_date'],update_serie['last_episode'], update_serie['next_episode_date'], update_serie['next_episode'], update_serie['seasons'], update_serie['video'], update_serie['alert'])
+
+        #     this_serie.save()
+        #     if this_serie.alert < 4 and this_serie.alert > 1:
+        #         dict_soon[item] = this_serie
+        #     elif this_serie.alert < 2:
+        #         dict_now[item] = this_serie
+
+        # nb_soon = len(dict_soon)
+        # nb_now = len(dict_now)
+        # nb_total = nb_soon + nb_now
             
     return render(request, 'webapp/search_result.html', locals())
         
@@ -158,7 +183,7 @@ def search_query(request, query, page_number=1):
     this_user = request.user.profil
     # search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = Search.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}       
@@ -186,21 +211,22 @@ def search_query(request, query, page_number=1):
 
 def display_favorites(request):
     this_user = request.user.profil
-    # search_class = Search('hello')
-
 
     if this_user.favorites == '[]':
-        dict_seriesT = SearchThread(Search.get_attributes_for_serie, [])
-        dict_seriesT.start()
-        dict_seriesT.join()
-        dict_series = dict_seriesT.result()
-        # dict_series = search_class._get_attributes_for_serie([])
+        dict_series = {}
     else:
         favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
-        dict_seriesT = SearchThread(Search.get_attributes_for_serie, favorite_seriesid)
-        dict_seriesT.start()
-        dict_seriesT.join()
-        dict_series = dict_seriesT.result()
+        dict_series = {}
+        for el in favorite_seriesid : 
+            this_serie = Serie.objects.get(id = el)
+            dict_series[el] = this_serie.display_favorites()
+
+
+        # #CREER DES SOUS LISTES DE 20 elements max
+        # dict_seriesT = SearchThread(Search.get_attributes_for_serie, favorite_seriesid)
+        # dict_seriesT.start()
+        # dict_seriesT.join()
+        # dict_series = dict_seriesT.result()
 
 
         # dict_series={}        
@@ -256,7 +282,7 @@ def genre(request, genre_id, genre_name, page_number=1):
     this_user = request.user.profil
     # search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = Search.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}       
@@ -280,13 +306,13 @@ def serieinfo(request, serie_id):
     # serie_info = search_class._get_attributes_for_serie_in_list([serie_id])[0]
     # similar_series = search_class._get_similar_series(serie_id)
 
-    serie_infoT=SearchThread(Search.get_attributes_for_serie_in_list, [serie_id])
+    serie_infoT=SearchThread(Search.get_attributes_for_serie, serie_id)
     similar_seriesT=SearchThread(Search.get_similar_series, serie_id)
     serie_infoT.start()
     similar_seriesT.start()
     serie_infoT.join()
     similar_seriesT.join()
-    serie_info=serie_infoT.result()[0]
+    serie_info=serie_infoT.result()
     similar_series = similar_seriesT.result()
 
 
@@ -294,7 +320,7 @@ def serieinfo(request, serie_id):
     this_user = request.user.profil
     search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = search_class.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}       
@@ -323,7 +349,7 @@ def seasoninfo(request, serie_id, season_number):
     this_user = request.user.profil
     search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = search_class.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}       
@@ -361,7 +387,7 @@ def trending(request, number_page=1):
     this_user = request.user.profil
     search_class = Search('hello')
     if this_user.favorites == '[]':
-        dict_series = search_class.get_attributes_for_serie([])
+        dict_series = {}
     else:
         dict_soon = {} 
         dict_now = {}       

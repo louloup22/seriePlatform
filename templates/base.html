@@ -30,11 +30,15 @@
       <li style="float:right;height:2px"><a class="notification" href=#> <i class="fa fa-fw fa-bell"><span class="badge">{{nb_total}}</span></i></a>
         <ul class="nav-dropdown" style="position: absolute;
   z-index: 1;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 300px;display: none;right:50px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 250px;display: none;right:50px;
 "> 
     {% if nb_now != 0 %}
     {% for serie in dict_now.values %}
-        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} day</a></li>
+    {% if serie.alert == 0 %}
+        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} today ! </a></li>
+    {% else %}
+        <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} tomorrow </a></li>
+    {% endif %}
 
      {% endfor %}
     {% endif %}
