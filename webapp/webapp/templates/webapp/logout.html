@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+Vous êtes connecté, {{ user.username }} !
+<h1>Se déconneter</h1>
+<form method="post" action="{% url "logout" %}">
+    {% csrf_token %}
+    <input type="submit" value="Se déconnecter" />
+</form>
+{% endif %}
+{% endblock %}
