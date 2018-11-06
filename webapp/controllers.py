@@ -14,11 +14,16 @@ def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
     print("this is the user_id: {0}".format(user_id))
     to_edit=Profil.objects.get(user_id=user_id)
-    search_class = Search('hello')
-    serie = search_class._get_attributes_for_serie_in_list([id])[0]
+    # search_class = Search('hello')
+    # serie = search_class.get_attributes_for_serie_in_list([id])[0]
+    serie = Search.get_attributes_for_serie(id)
     print('this is the serie {}'.format(serie))
-    create_serie=Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'])
+
+    create_serie=Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'],genres=serie['genres'],overview=serie['overview'],last_episode_date=serie['last_episode_date'],last_episode=serie['last_episode'],next_episode_date=serie['next_episode_date'],next_episode=serie['next_episode'],video=serie['video'])
     create_serie.save()
+    if type(create_serie.alert)!=int:
+        create_serie.alert=999999
+        create_serie.save()
     print(create_serie)
     
     if create_serie.favorites_user=='[]':
@@ -46,30 +51,25 @@ def add_favorite(request, id, user_id):
         else:
             to_edit.favorites.append(id)
             to_edit.save()    
-            
-            
-    
+                
     return JsonResponse({'status':'OK'})
 
 def remove_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
     print("this is the user_id: {0}".format(user_id))
     to_edit=Profil.objects.get(user_id=user_id)
+    to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
     to_edit.favorites.remove(id)
     to_edit.save()
     
     
     serie_change=Serie.objects.get(id=id)
+    #transformation en liste pour retier le numero de l'utilisateur
+    serie_change.favorites_user=[int(item) for item in serie_change.favorites_user[1:-1].split(',')]
     serie_change.favorites_user.remove(user_id)
+
     serie_change.save()
-    
-    
-    
-    
-    
-    
-    
+
+
     
     return JsonResponse({'status':'OK'})
-
-#def add_to_serie(request,)

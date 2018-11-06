@@ -7,13 +7,20 @@
 <h3>Find more {{name}} </h3>
 
     <div class="wrapper">
-   {% for serie in dict_series.values %}
+   {% for serie in dict_series %}
 
 
 
    <div class="container">
         
-          <img src={{ serie.poster_path }} alt="Avatar" class="image" >
+        {% if serie.poster_path == None  %}
+      <img src="/static/img/no_image_available.png" alt="Avatar" class="image" >
+        
+        {% else %}
+          <img src=" https://image.tmdb.org/t/p/w500{{ serie.poster_path }}" alt="Avatar" class="image" >
+
+          
+      {% endif %}
         
         <div class="middle" >
           <div class="text" >   
