@@ -7,7 +7,7 @@ import pandas as pd
 from django.http import JsonResponse
 from django.template.context import RequestContext
 import numpy as np
-
+import time
 
 """
 This is a list of different views
@@ -20,6 +20,8 @@ This is a list of different views
 #         Serie.__init__(self, id, name, nb_episodes, nb_seasons, genres, overview, last_episode_date, last_episode, next_episode_date, next_episode, alert, poster_path, seasons, video, video_title, favorites_user)
 
 #     def home(request): 
+
+
 
 
 def home(request):
@@ -79,6 +81,27 @@ def signup(request):
     else:
         form = SignUpForm()
 
+    if request.user.is_authenticated: 
+        this_user = request.user.profil
+        # search_class = Search('hello')
+        if this_user.favorites == '[]':
+            dict_series = {}
+        else:
+            dict_soon = {} 
+            dict_now = {}       
+            for item in this_user.favorites[1:-1].split(','): 
+                item = int(item)
+                print(item)
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+
+            nb_soon = len(dict_soon)
+            nb_now = len(dict_now)
+            nb_total = nb_soon + nb_now
+
     return render(request,'webapp/signup.html',locals())
 
 def search(request):
@@ -110,19 +133,25 @@ def search(request):
             threads.append(update_serie)
         for thread in threads:
             thread.join()
-        dict_series= [thread.result() for thread in threads]
+        #time.sleep(2)
+        dict_series = [thread.result() for thread in threads]
+        print(dict_series)
 
         for el in dict_series:
-            this_serie = Serie.objects.get(id = el['id'])
-            print("1er essai {}".format(this_serie))
-            this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
-            print("2eme essai {}".format(this_serie))
-            this_serie.save()
+            if el !=None:
+                this_serie = Serie.objects.get(id = el['id'])
+                print("1er essai {}".format(this_serie))
+                this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
+                print("2eme essai {}".format(this_serie))
+                this_serie.save()
+                
 
+        for item in favorite_seriesid:
+            this_serie = Serie.objects.get(id = item)
             if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[el['id']] = this_serie
+                dict_soon[item] = this_serie
             elif this_serie.alert < 2:
-                dict_now[el['id']] = this_serie
+                dict_now[item] = this_serie
 
         nb_soon = len(dict_soon)
         nb_now = len(dict_now)
