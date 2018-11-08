@@ -13,34 +13,23 @@ from webapp.models import Search, Serie, Profil
 def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
     print("this is the user_id: {0}".format(user_id))
-    to_edit=Profil.objects.get(user_id=user_id)
-    # search_class = Search('hello')
-    # serie = search_class.get_attributes_for_serie_in_list([id])[0]
+    to_edit = Profil.objects.get(user_id=user_id)
+    # info de la série à partir d'un appel à l'API
     serie = Search.get_attributes_for_serie(id)
-    print('this is the serie {}'.format(serie))
 
-    create_serie=Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'],genres=serie['genres'],overview=serie['overview'],last_episode_date=serie['last_episode_date'],last_episode=serie['last_episode'],next_episode_date=serie['next_episode_date'],next_episode=serie['next_episode'],video=serie['video'])
+
+    create_serie = Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'],genres=serie['genres'],overview=serie['overview'],last_episode_date=serie['last_episode_date'],last_episode=serie['last_episode'],next_episode_date=serie['next_episode_date'],next_episode=serie['next_episode'],video=serie['video'])
     create_serie.save()
-    if type(create_serie.alert)!=int:
-        create_serie.alert=999999
+    if type(create_serie.alert) != int:
+        create_serie.alert = 999999
         create_serie.save()
     print(create_serie)
     
-    if create_serie.favorites_user=='[]':
-        create_serie.favorites_user= '[{}]'.format(user_id)
-        create_serie.save()
-    else:
-        create_serie.favorites_user = [int(item) for item in create_serie.favorites_user[1:-1].split(',')]
-        print(to_edit)
-        if int(id) in create_serie.favorites_user:
-            pass
-        else:
-            create_serie.favorites_user.append(id)
-            create_serie.save()
+    create_serie.nb_fav_users += 1
+    create_serie.save()
     
-    
-    if to_edit.favorites=='[]':
-        to_edit.favorites= '[{}]'.format(id)
+    if to_edit.favorites == '[]':
+        to_edit.favorites = '[{}]'.format(id)
         to_edit.save()
     else:
         to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
@@ -57,19 +46,14 @@ def add_favorite(request, id, user_id):
 def remove_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
     print("this is the user_id: {0}".format(user_id))
+    # Supprimmer l'id de la série dans la liste de favoris de l'utilisateur
     to_edit=Profil.objects.get(user_id=user_id)
-    to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
-    to_edit.favorites.remove(id)
-    to_edit.save()
-    
-    
-    serie_change=Serie.objects.get(id=id)
-    #transformation en liste pour retier le numero de l'utilisateur
-    serie_change.favorites_user=[int(item) for item in serie_change.favorites_user[1:-1].split(',')]
-    serie_change.favorites_user.remove(user_id)
+    to_edit.remove_favorite(id)
 
-    serie_change.save()
-
-
+    # Supprimmer la ligne de la série dans la table série SI JAMAIS il n'y a plus d'autres utilisateurs l'ayant en favori
+    to_delete = Serie.objects.get(id = id) 
+    to_delete.nb_fav_users -= 1
+    if to_delete.nb_fav_users == 0 : 
+        to_delete.delete()
     
     return JsonResponse({'status':'OK'})
