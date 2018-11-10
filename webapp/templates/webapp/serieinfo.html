@@ -6,17 +6,21 @@
 <div class="serieinfo">
   <div class="serie_header">
     <br/>
-<h3>{{ serie_info.name }}</h3>
+    <button id="monBoutton" style="float: right"onclick="add_favorite({{serie_info.id}}, {{user.id}})">Add to favourites !</button>
+      <div class="serie_header">
+    <br/>
+    <br/>
+
+<h3 style="text-align:  center; ">{{ serie_info.name }}</h3>
+
     <div class="wrapper_info">
     {% for genre in serie_info.genres %}
     <p><a style="color:#F0F8FF" href="/genre/{{genre.name}}/{{genre.id}}/1"> {{ genre.name }} </a></p>
     {% endfor %}
   </div>
-
-<!-- ici ajouter aussi note-->
-
-
+<!-- ici ajouter aussi note donnéee à la série ? -->
 </div>
+
 <div class="media">
 <div class="img_info">
 <img src={{ serie_info.poster_path }}>
@@ -48,6 +52,7 @@
 	<p><a style="color:#F0F8FF" href="/serieinfo/{{ serie_info.id }}/seasoninfo/{{ season.season_number }}"> {{ season.name }}</a></p>
 {% endfor %}
 <br />
+</div>
 </div>
 </div>
 </div>

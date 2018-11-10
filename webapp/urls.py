@@ -11,6 +11,9 @@ from django.contrib.auth import views as auth_views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
 
+
+#Dans ce fichier nous spécifions les liens entre les urls des pages du site et nos fonctions de notre programme python
+#Ainsi quand l'utilisateur clique sur une page, cela déclenche bien la fonction python associée
 urlpatterns = [
                path('',views.home),
                path('login/',auth_views.login,{'template_name': 'webapp/login.html'}),
@@ -24,7 +27,6 @@ urlpatterns = [
                path('trending/<int:number_page>',views.trending, name = 'trending'),
                path('serieinfo/<int:serie_id>',views.serieinfo, name = 'serie_info'),
                path('serieinfo/<int:serie_id>/seasoninfo/<int:season_number>',views.seasoninfo, name = 'season_info'),
-               path('profile/',views.profile, name = 'profile'),
                path('genre/<str:genre_name>/<int:genre_id>/<int:page_number>',views.genre,name='genre')
         ]
 
