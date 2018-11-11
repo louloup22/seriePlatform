@@ -204,8 +204,8 @@ class Search(models.Model):
         else:
             dico["poster_path"] = "/static/img/no_image_available.png"
         """
-        si il s'agit de la saison 1, vérifier si il y a une saison spéciale 
-        dont le numéro de saison est 0 pour mettre ou nom une redirection vers la page de la saison 
+        si il s'agit de la saison 1, vérifier si il y a une saison spéciale
+        dont le numéro de saison est 0 pour mettre ou nom une redirection vers la page de la saison
         avec une flèche previous
         """
         if season_number == 1:
@@ -218,7 +218,7 @@ class Search(models.Model):
             if respbis["status_code"] == 34:
                  dico["prev_season"] = 0
             # si ce n'est pas le cas il y a un épisode 0 on donne le code 1 à prev_sesons
-            else: 
+            else:
                 dico["prev_season"] = 1
         print(dico)
         return dico
@@ -284,7 +284,6 @@ class Search(models.Model):
         resp = json.loads(req.content)
         results = resp["results"]
         return results
-
 
 #Création de la classe série qui notamment va servir à créer nos séries dans notre base de données
 # à partir des informations récupérées lors des appels à la base de données externe
