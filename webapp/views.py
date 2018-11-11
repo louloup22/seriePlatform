@@ -395,7 +395,7 @@ class Views():
 
     #Cette fonction permet de lancer les opérations nécessaires à l'affichage de la page info d'une saison
     #Cette page s'affiche quand l'utilisateur clique sur le numéro de la saison depuis la page d'information de la série
-    def seasoninfo(request, serie_id, season_number):
+    def seasoninfo(request, serie_id, season_number,nb_seasons):
         #Gestion des pages
         id = serie_id
         page = season_number
@@ -418,7 +418,6 @@ class Views():
         #Gestion des notifications: idem
         try:
             this_user = request.user.profil
-            search_class = Search('hello')
             if this_user.favorites == '[]':
                 dict_series = {}
             else:
@@ -467,7 +466,6 @@ class Views():
         #Gestion des notifications: idem
         try:
             this_user = request.user.profil
-            search_class = Search('hello')
             if this_user.favorites == '[]':
                 dict_soon = {}
                 dict_now = {}
