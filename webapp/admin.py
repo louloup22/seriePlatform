@@ -16,8 +16,6 @@ class SerieAdmin(admin.ModelAdmin):
         return Truncator(serie.overview).chars(200, truncate='...')
     short_overview.short_description = 'Glimpse of overview'
 
-
-
 admin.site.register(Serie,SerieAdmin)
 
 #from .models import Profil

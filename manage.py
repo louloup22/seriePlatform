@@ -2,6 +2,9 @@
 import os
 import sys
 
+#IMPORTANT
+#Fichier à lancer pour faire tourner la série, permet de vérifier l'installation de Django
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SeriePlatform1.settings")
     try:
