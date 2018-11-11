@@ -190,18 +190,39 @@ class Search(models.Model):
 
 #Cette fonction récupère les informations d'une saison d'une série donnée: nom, résumé de la saison, date de sortie, épisodes, chemin du poster
     def get_attributes_for_season(tv_id,season_number):
-        dico={}
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+API_KEY+"&language=en-US"
-        req =requests.get(url)
-        resp=json.loads(req.content)
-        dico["name"]=resp["name"] #nom de la saison
-        dico["overview"]=resp["overview"]
-        dico["air_date"]=resp["air_date"]
-        dico["episodes"]=resp["episodes"]
-        if resp["poster_path"]!=None:
-                dico["poster_path"]="https://image.tmdb.org/t/p/w500"+resp["poster_path"]
+        dico = {}
+        url = "https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/"+str(season_number)+"?api_key="+API_KEY+"&language=en-US"
+        req = requests.get(url)
+        resp = json.loads(req.content)
+        dico["name"] = resp["name"] #nom de la saison
+        dico["overview"] = resp["overview"]
+        dico["air_date"] = resp["air_date"]
+        dico["episodes"] = resp["episodes"]
+        dico["episode_count"]=len(resp["episodes"])
+        if resp["poster_path"] != None:
+                dico["poster_path"] = "https://image.tmdb.org/t/p/w500"+resp["poster_path"]
         else:
-            dico["poster_path"]="/static/img/no_image_available.png"
+            dico["poster_path"] = "/static/img/no_image_available.png"
+        """
+        si il s'agit de la saison 1, vérifier si il y a une saison spéciale 
+        dont le numéro de saison est 0 pour mettre ou nom une redirection vers la page de la saison 
+        avec une flèche previous
+        """
+        if season_number == 1:
+            # on fait un appel à l'API de l'épisode 0
+            urlbis = "https://api.themoviedb.org/3/tv/"+str(tv_id)+"/season/0?api_key="+API_KEY+"&language=en-US"
+            reqbis = requests.get(urlbis)
+            respbis = json.loads(reqbis.content)
+            print(respbis)
+            # si il n'y a pas d'episode 0, l'API renvoit un JSON avec status_code 34
+            #dans ce cas on donne le code 0 à prev_season
+            if "status_code" in respbis.keys():
+                if respbis["status_code"] == 34:
+                    dico["prev_season"] = 0
+            # si ce n'est pas le cas il y a un épisode 0 on donne le code 1 à prev_sesons
+            else: 
+                dico["prev_season"] = 1
+        print(dico)
         return dico
 
 
@@ -265,7 +286,6 @@ class Search(models.Model):
         resp = json.loads(req.content)
         results = resp["results"]
         return results
-
 
 #Création de la classe série qui notamment va servir à créer nos séries dans notre base de données
 # à partir des informations récupérées lors des appels à la base de données externe
