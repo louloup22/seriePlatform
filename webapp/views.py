@@ -2,12 +2,9 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import login, authenticate
 from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search, Serie, Profil,SearchThread
-from pandas import DataFrame as df
-import pandas as pd
 from django.http import JsonResponse
 from django.template.context import RequestContext
-import numpy as np
-import time
+
 
 """
 This is a list of different views
@@ -40,6 +37,41 @@ class Views():
         except:
             dict_series1 = []
             dict_series2 = []
+
+
+
+
+        #Lorsque l'utilisateur se connecte, il est directement redirigé sur la page home.
+        #Nous allons mettre à jour les notifications à ce moment la.
+        #Mise à jour des séries favorites
+        #Tout d'abord nous récupérons le profil de l'utilisateur avec this_user
+        this_user = request.user.profil
+        #S'il n'a pas de séries favorites rien n'est mis à jour
+        if this_user.favorites == '[]':
+            dict_series = {}
+        #Sinon nous traitons à la fois la mise à jour des informations sur ses séries favorites et les notifications
+        else:
+            #Nous récupérons au bon format (nombre) les ids des séries favorites de l'utilisateur
+            favorite_seriesid = [int(item) for item in this_user.favorites[1:-1].split(',')]
+            #Nous créons une liste qui va contenir nos threads lancés pour chaque ids
+            threads = []
+            #Pour chaque ids, nous créons un thread qui va récupérer les informations de l'épisode avec un appel à l'API
+            #Puis nous lançons le thread et l'enregistrons dans threads
+            for ids in favorite_seriesid:
+                update_serie = SearchThread(Search.get_attributes_for_serie, ids)
+                update_serie.start()
+                threads.append(update_serie)
+            #Nous attendons que tous les threads se soient exécutés
+            for thread in threads:
+                thread.join()
+            #Nous récupérons tous les résultats des threads dans dict_séries qui contient toutes les informations actualisées des séries favorites de l'utilisateur
+            dict_series = [thread.result() for thread in threads]
+            #Nous actualisons ensuite notre base de donnée en faisant appel à update_serie
+            for el in dict_series:
+                if el !=None:
+                    this_serie = Serie.objects.get(id = el['id'])
+                    this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
+                    this_serie.save()
 
         #Gestion des notifications: création de dictionnaires contenant les séries favorites de l'utilisateur
         #qui sortent le jour-même (dict_now) ou dans un délai de 4 jours (dict_soon).
@@ -87,6 +119,7 @@ class Views():
                 password = form.cleaned_data.get('password1')
                 user = authenticate(username = username, password = password)
                 login(request,user)
+                #redirection vers la page home
                 return redirect('/')
         #Redirection sur le questionnaire s'il y a une erreur dans les éléments entrés par l'utilisateur
         else:
@@ -130,14 +163,13 @@ class Views():
             form = SearchForm(request.POST)
             if form.is_valid():
                 query = form.cleaned_data.get('query')
-                print('/search/' + query)
                 envoi = True
                 return redirect('/search/' + query + '/1')
         else:
             form = SearchForm()
 
-        #Lorsque l'utilisateur se connecte, il est directement redirigé sur la page search.
-        #Nous mettons alors à jour ses séries favorites
+        
+        #Mise à jour des séries favorites
         #Tout d'abord nous récupérons le profil de l'utilisateur avec this_user
         this_user = request.user.profil
         #S'il n'a pas de séries favorites rien n'est mis à jour
@@ -160,7 +192,6 @@ class Views():
                 thread.join()
             #Nous récupérons tous les résultats des threads dans dict_séries qui contient toutes les informations actualisées des séries favorites de l'utilisateur
             dict_series = [thread.result() for thread in threads]
-            print(dict_series)
             #Nous actualisons ensuite notre base de donnée en faisant appel à update_serie
             for el in dict_series:
                 if el !=None:

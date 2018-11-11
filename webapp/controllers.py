@@ -9,31 +9,6 @@ from django.shortcuts import render,redirect
 from django.http import JsonResponse
 from webapp.models import Search, Serie, Profil
 
-def add_favorite(request, id, user_id):
-    print("this is the id: {0}".format(id))
-    print("this is the user_id: {0}".format(user_id))
-    to_edit = Profil.objects.get(user_id=user_id)
-    # info de la série à partir d'un appel à l'API
-    serie = Search.get_attributes_for_serie(id)
-
-
-    create_serie = Serie(id=id,name=serie['name'],poster_path=serie['poster_path'],alert=serie['alert'],nb_episodes=serie['nb_episodes'],nb_seasons=serie['nb_seasons'],genres=serie['genres'],overview=serie['overview'],last_episode_date=serie['last_episode_date'],last_episode=serie['last_episode'],next_episode_date=serie['next_episode_date'],next_episode=serie['next_episode'],video=serie['video'])
-    create_serie.save()
-    if type(create_serie.alert) != int:
-        create_serie.alert = 999999
-        create_serie.save()
-    print(create_serie)
-
-    create_serie.nb_fav_users += 1
-    create_serie.save()
-
-    if to_edit.favorites == '[]':
-        to_edit.favorites = '[{}]'.format(id)
-        to_edit.save()
-    else:
-        to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
-        print(to_edit)
-        #si l'id est deja dans les favoris de l'utilisateur
 #Cette fonction permet d'ajouter des séries favorites pour un utilisateur et d'enregistrer cette donnée dans notre base de données
 def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))

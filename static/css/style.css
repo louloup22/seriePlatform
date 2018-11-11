@@ -98,8 +98,12 @@ a:hover {
 }
 
 
+/*Page signup */
 
-
+.signup ul{
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
 
 /* Page serieinfo */
 /*commun à toute la partie sur les infos de la série*/
