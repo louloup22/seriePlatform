@@ -28,7 +28,8 @@ def notification(request):
         this_user = request.user.profil
         # search_class = Search('hello')
         if this_user.favorites == '[]':
-            dict_series = {}
+            dict_soon = {}
+            dict_now = {}
         else:
             dict_soon = {}
             dict_now = {}
@@ -50,36 +51,45 @@ def notification(request):
 def home(request):
     #On lance les threads pour récupérer les séries qui sortent le jour même ou dans la semaine
     #On pourra ensuite les afficher (cf HTML)
-    dict_seriesT1 = SearchThread(Search.get_tv_airing_today)
-    dict_seriesT2 = SearchThread(Search.get_tv_airing_week)
-    dict_seriesT1.start()
-    dict_seriesT2.start()
-    dict_seriesT1.join()
-    dict_seriesT2.join()
-    dict_series1 = dict_seriesT1.result()
-    dict_series2 = dict_seriesT2.result()
+    try:
+        dict_seriesT1 = SearchThread(Search.get_tv_airing_today)
+        dict_seriesT2 = SearchThread(Search.get_tv_airing_week)
+        dict_seriesT1.start()
+        dict_seriesT2.start()
+        dict_seriesT1.join()
+        dict_seriesT2.join()
+        dict_series1 = dict_seriesT1.result()
+        dict_series2 = dict_seriesT2.result()
+    except:
+        dict_series1 = []
+        dict_series2 = []
 
     #Gestion des notifications: création de dictionnaires contenant les séries favorites de l'utilisateur
     #qui sortent le jour-même (dict_now) ou dans un délai de 4 jours (dict_soon).
     #Puis calcul du nombre
-    if request.user.is_authenticated:
-        #On capte l'utilisateur
-        this_user = request.user.profil
-        if this_user.favorites == '[]':
-            dict_series = {}
-        else:
-            dict_soon = {}
-            dict_now = {}
-            for item in this_user.favorites[1:-1].split(','):
-                item = int(item)
-                this_serie = Serie.objects.get(id = item)
-                if this_serie.alert < 4 and this_serie.alert > 1:
-                    dict_soon[item] = this_serie
-                elif this_serie.alert < 2:
-                    dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
+    try:
+        if request.user.is_authenticated:
+            #On capte l'utilisateur
+            this_user = request.user.profil
+            if this_user.favorites == '[]':
+                dict_soon = {}
+                dict_now = {}
+            else:
+                dict_soon = {}
+                dict_now = {}
+                for item in this_user.favorites[1:-1].split(','):
+                    item = int(item)
+                    this_serie = Serie.objects.get(id = item)
+                    if this_serie.alert < 4 and this_serie.alert > 1:
+                        dict_soon[item] = this_serie
+                    elif this_serie.alert < 2:
+                        dict_now[item] = this_serie
+                nb_soon = len(dict_soon)
+                nb_now = len(dict_now)
+                nb_total = nb_soon + nb_now
+    except:
+        dict_soon = {}
+        dict_now = {}
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/home.html',locals())
@@ -108,7 +118,8 @@ def signup(request):
     if request.user.is_authenticated:
         this_user = request.user.profil
         if this_user.favorites == '[]':
-            dict_series = {}
+            dict_soon = {}
+            dict_now = {}
         else:
             dict_soon = {}
             dict_now = {}
@@ -175,14 +186,18 @@ def search(request):
                 this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
                 this_serie.save()
         #Gestion des notifications: idem
-        dict_soon = {}
-        dict_now = {}
-        for item in favorite_seriesid:
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
+        try:
+            dict_soon = {}
+            dict_now = {}
+            for item in favorite_seriesid:
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+        except:
+            dict_soon = {}
+            dict_now = {}
         nb_soon = len(dict_soon)
         nb_now = len(dict_now)
         nb_total = nb_soon + nb_now
@@ -201,43 +216,53 @@ def search_query(request, query, page_number=1):
     previous_page = page - 1
     next_page = page + 1
     envoi = True
-    #Création des threads :
-    # 1) Trouver les séries liés à la recheche
-    # 2) Trouver le nombre total de résultats de la recherche
-    # 3) Trouver le nombre de pages de la recherche
-    respT=SearchThread(Search.get_serie_by_name_with_space, query, page)
-    number_resultsT=SearchThread(Search.get_number_of_result,query,page)
-    number_pagesT=SearchThread(Search.get_number_of_pages, query,page)
-    #Lancement des threads
-    respT.start()
-    number_resultsT.start()
-    number_pagesT.start()
-    #Attente jusqu'à la fin de l'exécution de tous les threads
-    respT.join()
-    number_resultsT.join()
-    number_pagesT.join()
-    #Récupération des résultats des threads
-    resp = respT.result()
-    number_results = number_resultsT.result()
-    number_pages = number_pagesT.result()
-
+    try:
+        #Création des threads :
+        # 1) Trouver les séries liés à la recheche
+        # 2) Trouver le nombre total de résultats de la recherche
+        # 3) Trouver le nombre de pages de la recherche
+        respT=SearchThread(Search.get_serie_by_name_with_space, query, page)
+        number_resultsT=SearchThread(Search.get_number_of_result,query,page)
+        number_pagesT=SearchThread(Search.get_number_of_pages, query,page)
+        #Lancement des threads
+        respT.start()
+        number_resultsT.start()
+        number_pagesT.start()
+        #Attente jusqu'à la fin de l'exécution de tous les threads
+        respT.join()
+        number_resultsT.join()
+        number_pagesT.join()
+        #Récupération des résultats des threads
+        resp = respT.result()
+        number_results = number_resultsT.result()
+        number_pages = number_pagesT.result()
+    except:
+        error_message="The search did not succeed."
+        return render(request, 'webapp/error.html',locals())
     #Gestion des favoris: idem
-    this_user = request.user.profil
-    if this_user.favorites == '[]':
-        dict_series = {}
-    else:
+    try:
+        this_user = request.user.profil
+        if this_user.favorites == '[]':
+            dict_soon = {}
+            dict_now = {}
+        else:
+            dict_soon = {}
+            dict_now = {}
+            for item in this_user.favorites[1:-1].split(','):
+                item = int(item)
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+            
+    except:
         dict_soon = {}
         dict_now = {}
-        for item in this_user.favorites[1:-1].split(','):
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
-        nb_soon = len(dict_soon)
-        nb_now = len(dict_now)
-        nb_total = nb_soon + nb_now
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
+            
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/search_result.html', locals())
@@ -247,29 +272,38 @@ def search_query(request, query, page_number=1):
 #Cette page s'affiche quand l'utilisateur clique sur Favorites dans l'onglet de navigation
 def display_favorites(request):
     #On capte notre utilisateur
-    this_user = request.user.profil
-    if this_user.favorites == '[]':
-        dict_series = {}
-    #Si l'utilisateur a des séries favorites
-    else:
-        favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
-        dict_series = {}
-        #On enregistre dans dict_series toutes les informations nécessaires à l'affichage
-        for el in favorite_seriesid :
-            this_serie = Serie.objects.get(id = el)
-            dict_series[el] = this_serie.display_favorites()
-        #Gestion des notifications : idem
-        dict_soon = {}
-        dict_now = {}
-        for item in favorite_seriesid:
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
-        nb_soon = len(dict_soon)
-        nb_now = len(dict_now)
-        nb_total = nb_soon + nb_now
+    try:
+        this_user = request.user.profil
+        if this_user.favorites == '[]':
+            dict_series = {}
+        #Si l'utilisateur a des séries favorites
+        else:
+            favorite_seriesid= [int(item) for item in this_user.favorites[1:-1].split(',')]
+            dict_series = {}
+            #On enregistre dans dict_series toutes les informations nécessaires à l'affichage
+            for el in favorite_seriesid :
+                this_serie = Serie.objects.get(id = el)
+                dict_series[el] = this_serie.display_favorites()
+            #Gestion des notifications : idem
+            try:
+                dict_soon = {}
+                dict_now = {}
+                for item in favorite_seriesid:
+                    this_serie = Serie.objects.get(id = item)
+                    if this_serie.alert < 4 and this_serie.alert > 1:
+                        dict_soon[item] = this_serie
+                    elif this_serie.alert < 2:
+                        dict_now[item] = this_serie
+                
+            except:
+                dict_soon = {}
+                dict_now = {}
+            nb_soon = len(dict_soon)
+            nb_now = len(dict_now)
+            nb_total = nb_soon + nb_now
+    except:
+        error_message="Could not load your favorite shows."
+        return render(request, 'webapp/error.html',locals())
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/favorites.html',locals())
@@ -282,35 +316,44 @@ def genre(request, genre_id, genre_name, page_number=1):
     page = page_number
     previous_page = page_number - 1
     next_page = page_number + 1
-
-    #On crée les threads en utilisants les méthodes de Search puis on les lance
-    number_pageT=SearchThread(Search.get_genre_total_page, genre_id)
-    dict_seriesT = SearchThread(Search.get_tv_by_genre, genre_id, page)
-    number_pageT.start()
-    dict_seriesT.start()
-    #Attente de la fin des threads puis récupération des résultats
-    number_pageT.join()
-    dict_seriesT.join()
-    number_page=number_pageT.result()
-    dict_series=dict_seriesT.result()
-
-    #Gestion des notifications: idem
-    this_user = request.user.profil
-    if this_user.favorites == '[]':
-        dict_series = {}
-    else:
-        dict_soon = {}
-        dict_now = {}
-        for item in this_user.favorites[1:-1].split(','):
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
+    try:
+        
+        #On crée les threads en utilisants les méthodes de Search puis on les lance
+        number_pageT=SearchThread(Search.get_genre_total_page, genre_id)
+        dict_seriesT = SearchThread(Search.get_tv_by_genre, genre_id, page)
+        number_pageT.start()
+        dict_seriesT.start()
+        #Attente de la fin des threads puis récupération des résultats
+        number_pageT.join()
+        dict_seriesT.join()
+        number_page=number_pageT.result()
+        dict_series=dict_seriesT.result()
+    
+        #Gestion des notifications: idem
+        try:
+            this_user = request.user.profil
+            if this_user.favorites == '[]':
+                dict_soon = {}
+                dict_now = {}
+            else:
+                dict_soon = {}
+                dict_now = {}
+                for item in this_user.favorites[1:-1].split(','):
+                    item = int(item)
+                    this_serie = Serie.objects.get(id = item)
+                    if this_serie.alert < 4 and this_serie.alert > 1:
+                        dict_soon[item] = this_serie
+                    elif this_serie.alert < 2:
+                        dict_now[item] = this_serie
+        except:
+            dict_soon = {}
+            dict_now = {}
         nb_soon = len(dict_soon)
         nb_now = len(dict_now)
         nb_total = nb_soon + nb_now
+    except:
+        error_message="The search did not succeed."
+        return render(request, 'webapp/error.html',locals())        
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request,'webapp/genre.html',locals())
@@ -320,32 +363,41 @@ def genre(request, genre_id, genre_name, page_number=1):
 #Cette page s'affiche quand l'utilisateur clique sur le poster d'une série
 def serieinfo(request, serie_id):
     #Construction et lancement des threads selon les méthodes de Search et récupération des résulats
-    serie_infoT=SearchThread(Search.get_attributes_for_serie, serie_id)
-    similar_seriesT=SearchThread(Search.get_similar_series, serie_id)
-    serie_infoT.start()
-    similar_seriesT.start()
-    serie_infoT.join()
-    similar_seriesT.join()
-    serie_info=serie_infoT.result()
-    similar_series = similar_seriesT.result()
+    try:
+        serie_infoT=SearchThread(Search.get_attributes_for_serie, serie_id)
+        similar_seriesT=SearchThread(Search.get_similar_series, serie_id)
+        serie_infoT.start()
+        similar_seriesT.start()
+        serie_infoT.join()
+        similar_seriesT.join()
+        serie_info=serie_infoT.result()
+        similar_series = similar_seriesT.result()
+    except:
+        error_message="The show info could not be reached."
+        return render(request, 'webapp/error.html',locals())
 
     #Gestion des utilisateurs : idem
-    this_user = request.user.profil
-    if this_user.favorites == '[]':
-        dict_series = {}
-    else:
+    try:
+        this_user = request.user.profil
+        if this_user.favorites == '[]':
+            dict_soon = {}
+            dict_now = {}
+        else:
+            dict_soon = {}
+            dict_now = {}
+            for item in this_user.favorites[1:-1].split(','):
+                item = int(item)
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+    except:
         dict_soon = {}
         dict_now = {}
-        for item in this_user.favorites[1:-1].split(','):
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
-        nb_soon = len(dict_soon)
-        nb_now = len(dict_now)
-        nb_total = nb_soon + nb_now
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/serieinfo.html',locals())
@@ -355,29 +407,37 @@ def serieinfo(request, serie_id):
 #Cette page s'affiche quand l'utilisateur clique sur le numéro de la saison depuis la page d'information de la série
 def seasoninfo(request, serie_id, season_number):
     #Threading pour récupérer les résultats nécessaires grâce aux méthodes du module Search
-    season_infoT=SearchThread(Search.get_attributes_for_season, serie_id, season_number)
-    season_infoT.start()
-    season_infoT.join()
-    season_info=season_infoT.result()
+    try:
+        season_infoT=SearchThread(Search.get_attributes_for_season, serie_id, season_number)
+        season_infoT.start()
+        season_infoT.join()
+        season_info=season_infoT.result()
+    except:
+        error_message="The show info could not be reached."
+        return render(request, 'webapp/error.html',locals())
 
     #Gestion des notifications: idem
-    this_user = request.user.profil
-    search_class = Search('hello')
-    if this_user.favorites == '[]':
-        dict_series = {}
-    else:
+    try:
+        this_user = request.user.profil
+        search_class = Search('hello')
+        if this_user.favorites == '[]':
+            dict_series = {}
+        else:
+            dict_soon = {}
+            dict_now = {}
+            for item in this_user.favorites[1:-1].split(','):
+                item = int(item)
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+    except:
         dict_soon = {}
         dict_now = {}
-        for item in this_user.favorites[1:-1].split(','):
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
-        nb_soon = len(dict_soon)
-        nb_now = len(dict_now)
-        nb_total = nb_soon + nb_now
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/seasoninfo.html',locals())
@@ -386,37 +446,47 @@ def seasoninfo(request, serie_id, season_number):
 #Cette fonction permet de lancer les opérations nécessaire à l'affichage de la page trending
 #Cette page s'affiche quand l'utilisateur clique sur Trending dans la barre de navigation
 def trending(request, number_page=1):
-    page = number_page
-    previous_page = page - 1
-    next_page = page + 1
-    #Threading pour récupérer les résultats nécessaires grâce aux méthodes du module Search
-    number_pagesT=SearchThread(Search.get_number_of_trending_page, page)
-    dict_seriesT=SearchThread(Search.get_series_trending, page)
-    number_pagesT.start()
-    dict_seriesT.start()
-    number_pagesT.join()
-    dict_seriesT.join()
-    number_pages = number_pagesT.result()
-    dict_series=dict_seriesT.result()
+    try:
+        page = number_page
+        previous_page = page - 1
+        next_page = page + 1
+        #Threading pour récupérer les résultats nécessaires grâce aux méthodes du module Search
+        number_pagesT=SearchThread(Search.get_number_of_trending_page, page)
+        dict_seriesT=SearchThread(Search.get_series_trending, page)
+        number_pagesT.start()
+        dict_seriesT.start()
+        number_pagesT.join()
+        dict_seriesT.join()
+        number_pages = number_pagesT.result()
+        dict_series=dict_seriesT.result()
+    except:
+        error_message="Could not get trending TV shows."
+        return render(request, 'webapp/error.html',locals())
 
     #Gestion des notifications: idem
-    this_user = request.user.profil
-    search_class = Search('hello')
-    if this_user.favorites == '[]':
-        dict_series = {}
-    else:
+    try:
+        this_user = request.user.profil
+        search_class = Search('hello')
+        if this_user.favorites == '[]':
+            dict_soon = {}
+            dict_now = {}
+        else:
+            dict_soon = {}
+            dict_now = {}
+            for item in this_user.favorites[1:-1].split(','):
+                item = int(item)
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+            
+    except:
         dict_soon = {}
         dict_now = {}
-        for item in this_user.favorites[1:-1].split(','):
-            item = int(item)
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
-        nb_soon = len(dict_soon)
-        nb_now = len(dict_now)
-        nb_total = nb_soon + nb_now
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
         #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/trending.html',locals())
