@@ -51,36 +51,45 @@ def notification(request):
 def home(request):
     #On lance les threads pour récupérer les séries qui sortent le jour même ou dans la semaine
     #On pourra ensuite les afficher (cf HTML)
-    dict_seriesT1 = SearchThread(Search.get_tv_airing_today)
-    dict_seriesT2 = SearchThread(Search.get_tv_airing_week)
-    dict_seriesT1.start()
-    dict_seriesT2.start()
-    dict_seriesT1.join()
-    dict_seriesT2.join()
-    dict_series1 = dict_seriesT1.result()
-    dict_series2 = dict_seriesT2.result()
+    try:
+        dict_seriesT1 = SearchThread(Search.get_tv_airing_today)
+        dict_seriesT2 = SearchThread(Search.get_tv_airing_week)
+        dict_seriesT1.start()
+        dict_seriesT2.start()
+        dict_seriesT1.join()
+        dict_seriesT2.join()
+        dict_series1 = dict_seriesT1.result()
+        dict_series2 = dict_seriesT2.result()
+    except:
+        dict_series1 = []
+        dict_series2 = []
 
     #Gestion des notifications: création de dictionnaires contenant les séries favorites de l'utilisateur
     #qui sortent le jour-même (dict_now) ou dans un délai de 4 jours (dict_soon).
     #Puis calcul du nombre
-    if request.user.is_authenticated:
-        #On capte l'utilisateur
-        this_user = request.user.profil
-        if this_user.favorites == '[]':
-            dict_series = {}
-        else:
-            dict_soon = {}
-            dict_now = {}
-            for item in this_user.favorites[1:-1].split(','):
-                item = int(item)
-                this_serie = Serie.objects.get(id = item)
-                if this_serie.alert < 4 and this_serie.alert > 1:
-                    dict_soon[item] = this_serie
-                elif this_serie.alert < 2:
-                    dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
+    try:
+        if request.user.is_authenticated:
+            #On capte l'utilisateur
+            this_user = request.user.profil
+            if this_user.favorites == '[]':
+                dict_soon = {}
+                dict_now = {}
+            else:
+                dict_soon = {}
+                dict_now = {}
+                for item in this_user.favorites[1:-1].split(','):
+                    item = int(item)
+                    this_serie = Serie.objects.get(id = item)
+                    if this_serie.alert < 4 and this_serie.alert > 1:
+                        dict_soon[item] = this_serie
+                    elif this_serie.alert < 2:
+                        dict_now[item] = this_serie
+                nb_soon = len(dict_soon)
+                nb_now = len(dict_now)
+                nb_total = nb_soon + nb_now
+    except:
+        dict_soon = {}
+        dict_now = {}
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/home.html',locals())
@@ -177,14 +186,18 @@ def search(request):
                 this_serie = this_serie.update_serie(el['nb_episodes'], el['nb_seasons'], el['last_episode_date'],el['last_episode'], el['next_episode_date'], el['next_episode'], el['seasons'], el['video'], el['alert'])
                 this_serie.save()
         #Gestion des notifications: idem
-        dict_soon = {}
-        dict_now = {}
-        for item in favorite_seriesid:
-            this_serie = Serie.objects.get(id = item)
-            if this_serie.alert < 4 and this_serie.alert > 1:
-                dict_soon[item] = this_serie
-            elif this_serie.alert < 2:
-                dict_now[item] = this_serie
+        try:
+            dict_soon = {}
+            dict_now = {}
+            for item in favorite_seriesid:
+                this_serie = Serie.objects.get(id = item)
+                if this_serie.alert < 4 and this_serie.alert > 1:
+                    dict_soon[item] = this_serie
+                elif this_serie.alert < 2:
+                    dict_now[item] = this_serie
+        except:
+            dict_soon = {}
+            dict_now = {}
         nb_soon = len(dict_soon)
         nb_now = len(dict_now)
         nb_total = nb_soon + nb_now
@@ -242,12 +255,13 @@ def search_query(request, query, page_number=1):
                     dict_soon[item] = this_serie
                 elif this_serie.alert < 2:
                     dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
+            
     except:
         dict_soon = {}
         dict_now = {}
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
             
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
@@ -280,12 +294,13 @@ def display_favorites(request):
                         dict_soon[item] = this_serie
                     elif this_serie.alert < 2:
                         dict_now[item] = this_serie
-                nb_soon = len(dict_soon)
-                nb_now = len(dict_now)
-                nb_total = nb_soon + nb_now
+                
             except:
                 dict_soon = {}
                 dict_now = {}
+            nb_soon = len(dict_soon)
+            nb_now = len(dict_now)
+            nb_total = nb_soon + nb_now
     except:
         error_message="Could not load your favorite shows."
         return render(request, 'webapp/error.html',locals())
@@ -330,12 +345,12 @@ def genre(request, genre_id, genre_name, page_number=1):
                         dict_soon[item] = this_serie
                     elif this_serie.alert < 2:
                         dict_now[item] = this_serie
-                nb_soon = len(dict_soon)
-                nb_now = len(dict_now)
-                nb_total = nb_soon + nb_now
         except:
             dict_soon = {}
             dict_now = {}
+        nb_soon = len(dict_soon)
+        nb_now = len(dict_now)
+        nb_total = nb_soon + nb_now
     except:
         error_message="The search did not succeed."
         return render(request, 'webapp/error.html',locals())        
@@ -377,12 +392,12 @@ def serieinfo(request, serie_id):
                     dict_soon[item] = this_serie
                 elif this_serie.alert < 2:
                     dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
     except:
         dict_soon = {}
         dict_now = {}
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/serieinfo.html',locals())
@@ -417,12 +432,12 @@ def seasoninfo(request, serie_id, season_number):
                     dict_soon[item] = this_serie
                 elif this_serie.alert < 2:
                     dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
     except:
         dict_soon = {}
         dict_now = {}
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
     #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/seasoninfo.html',locals())
@@ -465,12 +480,13 @@ def trending(request, number_page=1):
                     dict_soon[item] = this_serie
                 elif this_serie.alert < 2:
                     dict_now[item] = this_serie
-            nb_soon = len(dict_soon)
-            nb_now = len(dict_now)
-            nb_total = nb_soon + nb_now
+            
     except:
         dict_soon = {}
         dict_now = {}
+    nb_soon = len(dict_soon)
+    nb_now = len(dict_now)
+    nb_total = nb_soon + nb_now
 
         #On redirige les éléments calculés vers le modèle html qui va l'afficher (cf code HTML)
     return render(request, 'webapp/trending.html',locals())
