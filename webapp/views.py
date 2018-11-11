@@ -282,11 +282,8 @@ def genre(request, genre_id, genre_name, page_number=1):
     page = page_number
     previous_page = page_number - 1
     next_page = page_number + 1
-<<<<<<< HEAD
 
-=======
     #On crée les threads en utilisants les méthodes de Search puis on les lance
->>>>>>> paul
     number_pageT=SearchThread(Search.get_genre_total_page, genre_id)
     dict_seriesT = SearchThread(Search.get_tv_by_genre, genre_id, page)
     number_pageT.start()

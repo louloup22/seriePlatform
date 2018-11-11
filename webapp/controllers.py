@@ -9,8 +9,6 @@ from django.shortcuts import render,redirect
 from django.http import JsonResponse
 from webapp.models import Search, Serie, Profil
 
-<<<<<<< HEAD
-
 def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
     print("this is the user_id: {0}".format(user_id))
@@ -36,7 +34,6 @@ def add_favorite(request, id, user_id):
         to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
         print(to_edit)
         #si l'id est deja dans les favoris de l'utilisateur
-=======
 #Cette fonction permet d'ajouter des séries favorites pour un utilisateur et d'enregistrer cette donnée dans notre base de données
 def add_favorite(request, id, user_id):
     print("this is the id: {0}".format(id))
@@ -67,7 +64,6 @@ def add_favorite(request, id, user_id):
     #Si l'utilisateur a déjà une liste de favoris dans la base de données, on ajoute simplement l'id de la nouvelle série favorite à cette liste (en vérifiant qu'il n'y est pas déjà).
     else:
         to_edit.favorites = [int(item) for item in to_edit.favorites[1:-1].split(',')]
->>>>>>> paul
         if int(id) in to_edit.favorites:
             pass
         else:
