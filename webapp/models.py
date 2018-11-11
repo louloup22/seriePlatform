@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 import webapp.config as config
 import json
 import requests
-from pandas import DataFrame as df
 from datetime import date
 import re
 from django.db.models.signals import post_save

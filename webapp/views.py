@@ -2,12 +2,9 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import login, authenticate
 from webapp.forms import SignUpForm, SearchForm
 from webapp.models import Search, Serie, Profil,SearchThread
-from pandas import DataFrame as df
-import pandas as pd
 from django.http import JsonResponse
 from django.template.context import RequestContext
-import numpy as np
-import time
+
 
 """
 This is a list of different views
