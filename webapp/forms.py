@@ -27,8 +27,5 @@ class SignUpForm(UserCreationForm):
 
 #Formatage du formulaire de recherche
 class SearchForm(forms.Form):
-    #On spécifie les attentes sur la recherche 
+    #On spécifie les attentes sur la recherche
     query = forms.CharField(max_length=30,required=True,label=None)
-    
-
-        

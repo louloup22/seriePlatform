@@ -17,3 +17,23 @@ class SerieAdmin(admin.ModelAdmin):
     short_overview.short_description = 'Glimpse of overview'
 
 admin.site.register(Serie,SerieAdmin)
+
+#from .models import Profil
+#
+#class ProfileInline(admin.StackedInline):
+#    model = Profil
+#    can_delete = False
+#    verbose_name_plural = 'Profil'
+#    fk_name = 'user'
+#
+#class CustomUserAdmin(UserAdmin):
+#    inlines = (ProfileInline, )
+#
+#    def get_inline_instances(self, request, obj=None):
+#        if not obj:
+#            return list()
+#        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
+#
+#
+#admin.site.unregister(User)
+#admin.site.register(User, CustomUserAdmin)

@@ -28,7 +28,7 @@ class SearchThread(Thread):
         self.args=args
         self.results = None
 
-#La fonction run du thread enregistre le résultat de la méthode employée dans self.results.        
+#La fonction run du thread enregistre le résultat de la méthode employée dans self.results.
     def run(self):
         self.results = self.method(*self.args)
         #self.results.type = self.method(*args).type
@@ -45,7 +45,7 @@ class Search(models.Model):
     #API_KEY = models.CharField(default=config.API_KEY, null = False, max_length=500)
     #query = models.CharField(null = True, verbose_name = "Search", max_length=400)
 
-#Cette première fonction permet d'obtenir les résultats d'une requête, préalablement reformatée (query.replace), en faisant appel à l'API.    
+#Cette première fonction permet d'obtenir les résultats d'une requête, préalablement reformatée (query.replace), en faisant appel à l'API.
     def get_serie_by_name_with_space(query,page=1):
         #20 results by page
         query=query.replace(" ","+")
@@ -53,9 +53,9 @@ class Search(models.Model):
         req =requests.get(url)
         resp=json.loads(req.content)
         results=resp["results"]
-        return results       
+        return results
 
-#Cette fonction nous permet d'obtenir le nombre de résultat d'une requête en faisant 1 appel à l'API               
+#Cette fonction nous permet d'obtenir le nombre de résultat d'une requête en faisant 1 appel à l'API
     def get_number_of_result(query,page=1):
         url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
@@ -63,15 +63,15 @@ class Search(models.Model):
         print(resp['total_results'])
         return resp['total_results']
 
-#Cette fonction nous permet d'obtenir le nombre de pages nécessaires pour afficher la requête (à raison de 20 résultats/page)    
+#Cette fonction nous permet d'obtenir le nombre de pages nécessaires pour afficher la requête (à raison de 20 résultats/page)
     def get_number_of_pages(query,page=1):
         url="https://api.themoviedb.org/3/search/tv?query="+query+"&api_key="+API_KEY+"&language=en-US&page="+str(page)
         req =requests.get(url)
         resp=json.loads(req.content)
         print(resp['total_pages'])
         return resp['total_pages']
-    
-#Cette fonction permet d'obternir certaines informations sur les résultats d'une requête et notamment le chemin d'accès au poster de la série         
+
+#Cette fonction permet d'obternir certaines informations sur les résultats d'une requête et notamment le chemin d'accès au poster de la série
     def get_info_from_result(query,page=1):
         dict_series={}
         obj=get_serie_by_name_with_space(query,page)
@@ -86,7 +86,7 @@ class Search(models.Model):
             dict_series[dico['id']]=dico
         return dict_series
 
-#Cette fonction permet d'extraire les ids de chaque série présente dans un résultat de recherche et de les enregistrer dans une liste    
+#Cette fonction permet d'extraire les ids de chaque série présente dans un résultat de recherche et de les enregistrer dans une liste
     def get_id_from_result(query,page=1):
         liste_id=[]
         obj=get_serie_by_name_with_space(query,page)
@@ -94,12 +94,12 @@ class Search(models.Model):
             liste_id.append(i['id'])
         print(len(liste_id))
         return liste_id
-    
-    
-#Cette fonction va permettre de récupérer les attributs pour correspondant à l'ID d'une série en entrée.    
+
+
+#Cette fonction va permettre de récupérer les attributs pour correspondant à l'ID d'une série en entrée.
     def get_attributes_for_serie(tv_id):
         dico={}
-        #Appel aux URL pour obtenir les attributs et la vidéo 
+        #Appel aux URL pour obtenir les attributs et la vidéo
         url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"?api_key="+API_KEY+"&language=en-US"
         url_video="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/videos?api_key="+API_KEY+"&language=en-US"
         req =requests.get(url)
@@ -133,7 +133,7 @@ class Search(models.Model):
             #Question pour next air date pas forcément donné par l'API
             dico["next_episode_date"]=None
             dico["next_episode"]=None
-        else: 
+        else:
             if resp['next_episode_to_air']==None:
                 dico["next_episode_date"]=None
                 dico["next_episode"]=None
@@ -156,7 +156,7 @@ class Search(models.Model):
         else:
             dico['alert']=999999
         #Récupération de la date du dernier épisode
-        if resp["last_air_date"]!=None:        
+        if resp["last_air_date"]!=None:
             last_air=resp["last_air_date"]
             liste=list(map(int,re.findall(r'\d+',last_air)))
             if len(liste)==3:
@@ -176,8 +176,8 @@ class Search(models.Model):
         else:
             dico["last_episode"]=None
         #Récupération du nom, du résumé, du nombre d'épisodes, du nombre de saisons, du nom des saisons, du chemin du poster et de l'id
-        dico["name"]=resp["name"]        
-        dico["overview"]=resp["overview"]        
+        dico["name"]=resp["name"]
+        dico["overview"]=resp["overview"]
         dico["nb_episodes"]=resp["number_of_episodes"]
         dico["nb_seasons"]=resp["number_of_seasons"]
         dico["seasons"]=resp["seasons"]
@@ -203,9 +203,9 @@ class Search(models.Model):
         else:
             dico["poster_path"]="/static/img/no_image_available.png"
         return dico
-    
- 
-    
+
+
+
     """Obtenir une liste de série d'un genre en particulier
     Pour obtenir une liste assez significative sans avoir trop de résultats nous ne montrerons
     que des séries ayant eu un épisode au moins depuis le 1er janvier 2012
@@ -234,45 +234,41 @@ class Search(models.Model):
         results=resp["results"]
         return results
 
-#Cette fonction récupère les séries qui sortent dans la semaine    
+#Cette fonction récupère les séries qui sortent dans la semaine
     def get_tv_airing_week(page=1):
-        url=" https://api.themoviedb.org/3/tv/on_the_air?api_key="+API_KEY+"&language=en-US&page="+str(page)
-        req =requests.get(url)
-        resp=json.loads(req.content)
-        results=resp["results"]
+        url = " https://api.themoviedb.org/3/tv/on_the_air?api_key="+API_KEY+"&language=en-US&page="+str(page)
+        req = requests.get(url)
+        resp = json.loads(req.content)
+        results = resp["results"]
         return results
 
 #Cette fonction récupère le nombre de pages pour les suggestions de séries du moment
     def get_number_of_trending_page(page=1):
-        url="https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
-        req =requests.get(url)
-        resp =json.loads(req.content)
-        number= resp['total_pages']
+        url = "https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
+        req = requests.get(url)
+        resp = json.loads(req.content)
+        number = resp['total_pages']
         return number
 
 #Cette fonction récupère les suggestions de séries du moment
     def get_series_trending(page=1):
-        url="https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
-        req =requests.get(url)
-        resp=json.loads(req.content)
-        results=resp["results"]
+        url = "https://api.themoviedb.org/3/tv/popular?api_key="+API_KEY+"&language=en-US&page="+str(page)
+        req = requests.get(url)
+        resp = json.loads(req.content)
+        results = resp["results"]
         return results
 
 #Cette fonction permet de récupérer les séries similaires à la séries sélectionnée
     def get_similar_series(tv_id):
-        url="https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+API_KEY+"&language=en-US&page=1"
-        req =requests.get(url)
-        resp=json.loads(req.content)
-        results=resp["results"]        
+        url = "https://api.themoviedb.org/3/tv/"+str(tv_id)+"/recommendations?api_key="+API_KEY+"&language=en-US&page=1"
+        req = requests.get(url)
+        resp = json.loads(req.content)
+        results = resp["results"]
         return results
-    
 
 #Création de la classe série qui notamment va servir à créer nos séries dans notre base de données
 # à partir des informations récupérées lors des appels à la base de données externe
-class Serie(models.Model): 
-    #serie_id inutile
-    #Création des objets de la classe
-    serie_id = models.IntegerField(verbose_name = "Serie id",default=999999999)
+class Serie(models.Model):
     name = models.CharField(max_length=300, null = False)
     nb_episodes = models.IntegerField(verbose_name = "Total number of episodes")
     nb_seasons = models.IntegerField(verbose_name = "Total number of seasons")
@@ -286,16 +282,35 @@ class Serie(models.Model):
     video_title = models.CharField(max_length=200, verbose_name = "Video title", null = True)
     poster_path = models.CharField(max_length=200, verbose_name = "Poster path", null = True)
     seasons = models.TextField(null=True, verbose_name = "Seasons and episodes info")
-    favorites_user = models.TextField(default='[]', null=True,blank=True)
+    nb_fav_users = models.IntegerField(default=0, null=True,blank=True)
     alert = models.IntegerField(verbose_name = "Days before next episode",default=999999, null=True,blank=True)
-    
-    
+
+
     class Meta:
         verbose_name = "Série"
         verbose_name_plural= "Séries"
-    
-    def __str__(self):
-        return self.name
+
+    # def __str__(self):
+    #     return self.name
+
+    def update_serie(self, nb_episodes, nb_seasons, last_episode_date,last_episode, next_episode_date, next_episode,seasons,video,alert):
+        self.nb_episodes = nb_episodes
+        self.nb_seasons = nb_seasons
+        self.last_episode_date = last_episode_date
+        self.last_episode = last_episode
+        self.next_episode_date = next_episode_date
+        self.next_episode = next_episode
+        self.seasons = seasons
+        self.video = video
+        self.alert = alert
+        return self
+
+    def display_favorites(self):
+        dict = {}
+        dict['id'] = self.id
+        dict['name'] = self.name
+        dict['poster_path'] = self.poster_path
+        return dict
 
 
 #Cette fonction va permettre de mettre à jour notre base de données interne grâce à la récupération des informations lors de la connection de l'utilisateur
@@ -324,9 +339,9 @@ class Serie(models.Model):
 #Création de la classe Profil qui est complémentaire de Django pour la gestion des utilisateurs de notre site
 class Profil(models.Model):
     #Liaison vers le modèle User de Django
-    user =  models.OneToOneField(User,on_delete=models.CASCADE) 
+    user =  models.OneToOneField(User,on_delete=models.CASCADE)
     favorites = models.TextField(default='[]', null=True,blank=True)
-    
+
 #Cette fonction permet à l'utilisateur d'ajouter aux favoris une série (appel de la fonction grâce au bouton "Add to favourites" sur le site")
     def _add_favorites(self,x):
         self.favorites = json.dumps(x)
@@ -338,11 +353,11 @@ class Profil(models.Model):
         for el in string:
             liste_favorites.append(el)
         return liste_favorites
-    
-#Cette fonction permet de récupérer la liste de favoris d'un utilisateur    
+
+#Cette fonction permet de récupérer la liste de favoris d'un utilisateur
     def _get_favorites(self):
         return self._convert_favorites()
-    
+
 #Cette fonction permet de supprimer une série de la liste de favoris (appel de la fonction grâce à un bouton sur le site)
     def _remove_favorites(self,x):
         new_list = self._convert_favorites().pop(x)
@@ -354,14 +369,3 @@ def update_user_profile(sender, instance, created, **kwargs):
     if created:
         Profil.objects.create(user=instance)
     instance.profil.save()
-
-
-        
-    
-
-                
-
-
-
-
-
