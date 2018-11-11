@@ -35,7 +35,6 @@ def notification(request):
             dict_now = {}
             for item in this_user.favorites[1:-1].split(','):
                 item = int(item)
-                print(item)
                 this_serie = Serie.objects.get(id = item)
                 if this_serie.alert < 4 and this_serie.alert > 1:
                     dict_soon[item] = this_serie
@@ -125,7 +124,6 @@ def signup(request):
             dict_now = {}
             for item in this_user.favorites[1:-1].split(','):
                 item = int(item)
-                print(item)
                 this_serie = Serie.objects.get(id = item)
                 if this_serie.alert < 4 and this_serie.alert > 1:
                     dict_soon[item] = this_serie
@@ -148,7 +146,6 @@ def search(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             query = form.cleaned_data.get('query')
-            print('/search/' + query)
             envoi = True
             return redirect('/search/' + query + '/1')
     else:
@@ -178,7 +175,6 @@ def search(request):
             thread.join()
         #Nous récupérons tous les résultats des threads dans dict_séries qui contient toutes les informations actualisées des séries favorites de l'utilisateur
         dict_series = [thread.result() for thread in threads]
-        print(dict_series)
         #Nous actualisons ensuite notre base de donnée en faisant appel à update_serie
         for el in dict_series:
             if el !=None:
@@ -405,8 +401,15 @@ def serieinfo(request, serie_id):
 
 #Cette fonction permet de lancer les opérations nécessaires à l'affichage de la page info d'une saison
 #Cette page s'affiche quand l'utilisateur clique sur le numéro de la saison depuis la page d'information de la série
-def seasoninfo(request, serie_id, season_number):
+def seasoninfo(request, serie_id, season_number,nb_seasons):
     #Threading pour récupérer les résultats nécessaires grâce aux méthodes du module Search
+    id = serie_id
+    page = season_number
+    previous_page = season_number - 1
+    next_page = season_number + 1
+    nb_seasons=nb_seasons
+
+
     try:
         season_infoT=SearchThread(Search.get_attributes_for_season, serie_id, season_number)
         season_infoT.start()
@@ -415,7 +418,6 @@ def seasoninfo(request, serie_id, season_number):
     except:
         error_message="The show info could not be reached."
         return render(request, 'webapp/error.html',locals())
-
     #Gestion des notifications: idem
     try:
         this_user = request.user.profil
