@@ -1,10 +1,17 @@
 {% extends "base.html" %}
-
 {% block content %}
-
 
 <h1 style="margin-left: 2%;">Search TV shows by keywords</h1>
 <div class="searchbar" style="margin-left: 3%;">
+  <p> Search a TV show by keywords to retrieve all series matching this keywords. 
+    <br/>
+    <b>Advice :</b> be quite specific if you do not want us to find too many irrelevant results ...
+    <br/>
+    <br/>
+    You can then add series to your favorite list, find more info and trailers of the serie only by clicking on its name !
+    <br/>
+    Try it out here! 
+  </p>
 
 <form method="post" action="/search/" >
     {% csrf_token %}
@@ -24,10 +31,7 @@ function getResult(){
 
 
 {% if envoi %}
-<!-- <h1>Results</h1> -->
 <h3 style="text-align: left ;margin-left: 2%;">{{ number_results }} TV shows obtained for {{ query }} : </h3>
-
-<!-- <h3>Find your series here:</h3> -->
 
    	<div class="wrapper">
    {% for serie in resp %}
@@ -55,7 +59,7 @@ function getResult(){
 
 	{% endfor %}
 	</div>     
-<h3>Browse pages</h3>
+<div class="page-browser">
 
 {% if page == 1 %}
 <a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
@@ -67,20 +71,10 @@ function getResult(){
 <a href="/search/{{query}}/{{previous_page}}" class="previous">&laquo; Previous</a>
 <a href="/search/{{query}}/{{next_page}}" class="next">Next &raquo;</a>
 {% endif %}
-
+</div>
 
 
 <script>
-/*var element = document.getElementById("monBoutton"); // Retrouver l element dans le DOM
-var event = "click"; // Evenement que l on veut detecter
-// Qu'est ce que on execute lorsque "click" est généré dans mon element.
-var handler = function(e) {
-	console.log(e);
-	// Je veux envoyer une requette http (POST)
-	add_favorite({{serie.id}},{{user.id}});
-};
-element.addEventListener(event, handler);*/
-
 
 function add_favorite(id,user_id) {
 

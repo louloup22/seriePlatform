@@ -22,16 +22,12 @@
             <li><a href="/login/"> <i class="fa fa-fw fa-user"></i>Login</a></li>
             <li style="float:right"><a href="/logout/"><i class="fa fa-fw fa-power-off"></i></a></li>
 
-
-
-
            {% if user.is_authenticated %}
-<!--            <div class="w3-dropdown-hover"> -->
+
       <li style="float:right;height:2px"><a class="notification" href=#> <i class="fa fa-fw fa-bell"><span class="badge">{{nb_total}}</span></i></a>
         <ul class="nav-dropdown" style="position: absolute;
   z-index: 1;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 250px;display: none;right:50px;
-"> 
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);max-width: 250px;display: none;right:50px;"> 
     {% if nb_now != 0 %}
     {% for serie in dict_now.values %}
     {% if serie.alert == 0 %}
@@ -45,7 +41,6 @@
 {% if nb_soon != 0 %}
   {% for serie in dict_soon.values %}
 
-<!--       <div class="w3-dropdown-content w3-bar-block w3-card-4"> -->
         <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
     {% endfor %}
     {% endif %}
@@ -91,19 +86,18 @@
 
        {% endblock %}
    </nav>
-   <section id="content">
+   <section id="content" style="min-height:  calc(100vh - 177px);">
        {% block content %}{% endblock %}
-
-
-
-
    </section>
-<br/>
+<!-- <br/> -->
 
-<div class="end" style="background-color: aliceblue">
-<h4>My TV show platform</h4>
-<p style="font-style: italic;">Find all your favorite TV shows and discover new trending TV shows to watch ! Stay tuned with notifications letting you know when will be aired next episodes of your favorite series !</p>
-<a href=""><i class="fa fa-fw fa-phone"></i>Contact</a>
+<div class="end" style="background-color: #333;
+    color: white;
+    bottom: 0px;height:177px;clear: both;">
+  <br/>
+<h4 style="margin-left: 3px;">My TV show platform</h4>
+<p style="font-style: italic; margin-left: 7px;">Find all your favorite TV shows and discover new trending TV shows to watch ! Stay tuned with notifications letting you know when will be aired next episodes of your favorite series !</p>
+<a style="color: white" href=""><i class="fa fa-fw fa-phone"></i>Contact</a>
 
 <footer>&copy; My TV show Platform - copyright 2018
 </footer>
