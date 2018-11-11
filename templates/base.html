@@ -23,7 +23,7 @@
             <li style="float:right"><a href="/logout/"><i class="fa fa-fw fa-power-off"></i></a></li>
 
            {% if user.is_authenticated %}
-
+      {% if nb_total > 0 %}
       <li style="float:right;height:2px"><a class="notification" href=#> <i class="fa fa-fw fa-bell"><span class="badge">{{nb_total}}</span></i></a>
         <ul class="nav-dropdown" style="position: absolute;
   z-index: 1;
@@ -38,7 +38,8 @@
 
      {% endfor %}
     {% endif %}
-{% if nb_soon != 0 %}
+
+  {% if nb_soon != 0 %}
   {% for serie in dict_soon.values %}
 
         <li><a href="/serieinfo/{{ serie.id }}"> {{serie.name}} in {{serie.alert}} days</a></li>
@@ -47,6 +48,10 @@
 
       </ul>
       </li>
+    {% else %}
+    <li style="float:right;height:2px"><a class="notification" href=#> <i class="fa fa-fw fa-bell"></i></a>
+    {% endif %}
+
 
            <li><a href="/search/"><i class="fa fa-fw fa-search"></i>Search</a></li>
            <li><a href="/favorites/"><i class="fa fa-fw fa-heart"></i>Favorites</a></li>

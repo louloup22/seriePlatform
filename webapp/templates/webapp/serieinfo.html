@@ -12,7 +12,6 @@
     <br/>
 
 <h3 style="text-align:  center; ">{{ serie_info.name }}</h3>
-
     <div class="wrapper_info">
     {% for genre in serie_info.genres %}
     <p><a style="color:#F0F8FF" href="/genre/{{genre.name}}/{{genre.id}}/1"> {{ genre.name }} </a></p>
@@ -57,7 +56,7 @@
 
 <div style="margin-top:2px" class="wrapper">
 {% for season in serie_info.seasons %}
-	<p><a style="color:#F0F8FF" href="/serieinfo/{{ serie_info.id }}/seasoninfo/{{ season.season_number }}"> {{ season.name }}</a></p>
+	<p><a style="color:#F0F8FF" href="/serieinfo/{{ serie_info.id }}/seasoninfo/{{ season.season_number }}/{{serie_info.nb_seasons}}"> {{ season.name }}</a></p>
 {% endfor %}
 <br />
 </div>

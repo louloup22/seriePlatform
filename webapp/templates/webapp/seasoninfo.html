@@ -6,7 +6,34 @@
 <div class="season_info">
 <br />
 
+<!-- Gestion des pages précédentes et suivantes en fonction du numéro de saisons -->
 
+<!-- Si le numéro de série est 0 il n'y a pas de saison précédent on ne met que le bouton next -->
+{% if page == 0 %}
+<a href="/serieinfo/{{id}}/seasoninfo/{{next_page}}/{{nb_seasons}}" class="next">Next &raquo;</a>
+
+<!-- Si le numéro de série est 1 il faut vérifier s'il y a une saison précédente pour les flèches -->
+{% elif page == 1 %}
+{% if season_info.prev_season == 0 %}
+<!-- Dans ce cas, pas de saison 0 -->
+<a href="/serieinfo/{{id}}/seasoninfo/{{next_page}}/{{nb_seasons}}" class="next">Next &raquo;</a>
+{% elif season_info.prev_season == 1 %}
+<!-- Dans ce cas, il y a une saison 0, on doit donc aussi mettre le bouton previous -->
+<a href="/serieinfo/{{id}}/seasoninfo/{{previous_page}}/{{nb_seasons}}" class="previous">&laquo; Previous</a>
+<a href="/serieinfo/{{id}}/seasoninfo/{{next_page}}/{{nb_seasons}}" class="next">Next &raquo;</a>
+{% endif %}
+
+<!-- Il s'agit de la dernière saison, on ne peut aller sur la page suivante donc on ne met que le bouton précédent -->
+{% elif page == nb_seasons %}
+<a href="/serieinfo/{{id}}/seasoninfo/{{previous_page}}/{{nb_seasons}}" class="previous">&laquo; Previous</a>
+
+<!-- Saison qui a une précédente et une suivante -->
+{% else %}
+<a href="/serieinfo/{{id}}/seasoninfo/{{previous_page}}/{{nb_seasons}}" class="previous">&laquo; Previous</a>
+<a href="/serieinfo/{{id}}/seasoninfo/{{next_page}}/{{nb_seasons}}" class="next">Next &raquo;</a>
+{% endif %}
+
+<!-- Titre de la saison -->
 <h3 margin-top: 10%>{{ season_info.name }}</h3>
 <div class="season_info.info" style="margin-left:3%;display: flex;">
 	<img src={{season_info.poster_path}} alt="Avatar" class="image">
